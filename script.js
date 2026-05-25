@@ -15,6 +15,13 @@ const FISH_TYPES = {
     koi: { color: '#f5f5dc', shadow: '#d2d2b4', highlight: '#ffffff', size: 40, speed: 0.4, turnRate: 0.02 } 
 };
 
+const PLANT_TYPES = {
+    tall: { color: '#228822', height: 80, width: 10, segments: 8 },
+    short: { color: '#22aa44', height: 40, width: 15, segments: 4 },
+    fern: { color: '#44bb44', height: 60, width: 6, segments: 10 },
+    red: { color: '#aa4444', height: 50, width: 8, segments: 6 }
+};
+
 // --- Game State ---
 let state = 'MENU';
 let fishes = [];
@@ -37,14 +44,16 @@ ctx.imageSmoothingEnabled = false;
 // --- Entities ---
 
 class Plant {
-    constructor(x) {
-        this.x = x;
-        this.y = GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 12;
-        this.height = 30 + Math.random() * 50;
-        this.width = 8 + Math.random() * 8;
-        this.segments = Math.floor(this.height / 10);
+    constructor(type, x) {
+        this.type = type;
+        const config = PLANT_TYPES[type] || PLANT_TYPES.tall;
+        this.x = x || Math.random() * CANVAS_WIDTH;
+        this.y = GRAVEL_MAP[Math.floor(this.x)] || CANVAS_HEIGHT - 12;
+        this.height = config.height + (Math.random() - 0.5) * 20;
+        this.width = config.width + (Math.random() - 0.5) * 4;
+        this.segments = config.segments;
         this.offset = Math.random() * Math.PI * 2;
-        this.color = Math.random() > 0.5 ? '#228822' : '#22aa44';
+        this.color = config.color;
     }
 
     draw() {
@@ -392,7 +401,7 @@ function handleStart(e) {
     } else if (target.id === 'add-fish-btn') {
         document.getElementById('add-fish-overlay').classList.remove('hidden');
     } else if (target.id === 'add-plant-btn') {
-        plants.push(new Plant(Math.random() * CANVAS_WIDTH));
+        document.getElementById('add-plant-overlay').classList.remove('hidden');
     } else if (target.id === 'reset-btn') {
         resetGame();
     }
@@ -403,6 +412,14 @@ function handleStart(e) {
         document.getElementById('add-fish-overlay').classList.add('hidden');
     } else if (target.id === 'close-add-fish') {
         document.getElementById('add-fish-overlay').classList.add('hidden');
+    }
+
+    // Add Plant Overlay
+    else if (target.classList.contains('add-plant-option')) {
+        plants.push(new Plant(target.getAttribute('data-plant'), Math.random() * CANVAS_WIDTH));
+        document.getElementById('add-plant-overlay').classList.add('hidden');
+    } else if (target.id === 'close-add-plant') {
+        document.getElementById('add-plant-overlay').classList.add('hidden');
     }
 
     if (e.cancelable && target.tagName === 'BUTTON') e.preventDefault();
@@ -428,6 +445,7 @@ function resetGame() {
     document.getElementById('menu-overlay').classList.remove('hidden');
     document.getElementById('game-ui').classList.add('hidden');
     document.getElementById('add-fish-overlay').classList.add('hidden');
+    document.getElementById('add-plant-overlay').classList.add('hidden');
 }
 
 window.addEventListener('touchstart', handleStart, { passive: false });

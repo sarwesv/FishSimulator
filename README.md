@@ -9,12 +9,11 @@ FishSimulator is a relaxing, interactive aquarium experience designed with a "lo
 ### ✨ Key Features
 
 - **Relaxing Care System:** Your fish is completely **invincible**. There are no "game over" states or health depletions. Enjoy a stress-free environment where the goal is simply to interact and care for your pet.
-- **Multiple Fish Species:** Choose from four distinct species, each with unique AI behaviors:
-  - **Goldfish:** Classic and friendly.
-  - **Neon Tetra:** Small and fast.
-  - **Betta:** Elegant with flowing fins.
-  - **Koi:** Features procedurally generated patterns, making every Koi unique.
+- **Multiple Fish & Plant Species:** Choose specific varieties to customize your tank:
+  - **Fish:** Goldfish, Neon Tetra, Betta, Koi.
+  - **Plants:** Tall Seaweed, Short Bush, Water Fern, Red Algae.
 - **Interactive Environment:**
+  - **Selection Menus:** "ADD FISH" and "ADD PLANT" now provide menus to select exactly what you want to add.
   - **Physics-based Feeding:** Drop food flakes and watch your fish enjoy them.
   - **Dynamic Water Quality:** Tank debris accumulates over time, subtly tinting the water.
   - **Gravel Cleaning:** Restore water clarity with the click of a button.
