@@ -112,6 +112,21 @@ class Fish {
                 this.vy += (dy / d) * this.config.speed * 0.03;
             }
         }
+
+        // --- Collision Avoidance (Separation) ---
+        fishes.forEach(other => {
+            if (other === this) return;
+            let adx = this.x - other.x;
+            let ady = this.y - other.y;
+            let dist = Math.sqrt(adx * adx + ady * ady);
+            let minDist = (this.config.size + other.config.size) * 0.5;
+            if (dist < minDist && dist > 0) {
+                let push = (minDist - dist) * 0.02;
+                this.vx += (adx / dist) * push;
+                this.vy += (ady / dist) * push;
+            }
+        });
+
         this.vx *= FRICTION; this.vy *= FRICTION;
         this.x += this.vx; this.y += this.vy;
         
