@@ -94,6 +94,7 @@ class Fish {
         this.flip = false;
         this.animTimer = Math.random() * 10;
         this.idleTimer = 0;
+        this.mouthTimer = 0;
     }
 
     update() {
@@ -121,8 +122,13 @@ class Fish {
         if (this.vx > 0.05) this.flip = false;
         if (this.vx < -0.05) this.flip = true;
 
+        if (this.mouthTimer > 0) this.mouthTimer--;
         foods.forEach((f, i) => {
-            if (Math.abs(f.x - this.x) < 10 && Math.abs(f.y - this.y) < 6) foods.splice(i, 1);
+            if (Math.abs(f.x - this.x) < 15 && Math.abs(f.y - this.y) < 10) this.mouthTimer = 20;
+            if (Math.abs(f.x - this.x) < 10 && Math.abs(f.y - this.y) < 6) {
+                foods.splice(i, 1);
+                this.mouthTimer = 30;
+            }
         });
     }
 
@@ -220,6 +226,15 @@ class Fish {
             dot(-4,-2,8,4,config.c1);
             dot(-6,-2+sway,2,4,config.outline);
             dot(2,-1,1,1,config.outline);
+        }
+
+        if (this.mouthTimer > 0) {
+            let mx = 4, my = 1;
+            if (this.type === 'angelfish') { mx = 3; my = 2; }
+            if (this.type === 'koi') { mx = 7; my = 0; }
+            if (this.type === 'betta') { mx = 3; my = 1; }
+            if (this.type === 'pufferfish') { mx = 4; my = 1; }
+            dot(mx, my, 2, 2, config.outline);
         }
 
         ctx.restore();
