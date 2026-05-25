@@ -42,6 +42,8 @@ const FISH_TYPES = {
     guppy: { c1: '#888888', c2: '#00ffcc', c3: '#ff66ff', outline: '#222222', size: 14, speed: 0.6 },
     pufferfish: { c1: '#ccaa77', c2: '#eeddcc', c3: '#553311', outline: '#332211', size: 15, speed: 0.25 },
     clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 14, speed: 0.55 },
+    platy: { c1: '#ff4400', c2: '#ffcc00', c3: '#000000', outline: '#331100', size: 14, speed: 0.5 },
+    coralshrimp: { c1: '#ffffff', c2: '#ff0000', c3: '#ffffff', outline: '#220000', size: 12, speed: 0.35, habitat: 'bottom' },
     cory: { c1: '#887766', c2: '#554433', c3: '#332211', outline: '#110000', size: 15, speed: 0.3, habitat: 'bottom' },
     shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#440000', size: 10, speed: 0.4, habitat: 'bottom' },
     snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#221100', size: 12, speed: 0.1, habitat: 'bottom' }
@@ -207,21 +209,42 @@ class Fish {
 
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
-        if (this.type === 'clownfish') {
-            // Outline
+        else if (this.type === 'clownfish') {
+            // ... (rest of clownfish logic)
             dot(-5, -3, 10, 6, config.outline);
-            // Body
             dot(-4, -2, 8, 4, config.c1);
             dot(-3, -3, 6, 6, config.c1);
-            // White Bands with black borders
             dot(-3, -3, 2, 6, config.outline); dot(-3, -2, 2, 4, config.c2); // Front
             dot(0, -3, 2, 6, config.outline); dot(0, -2, 2, 4, config.c2);   // Middle
             dot(3, -2, 1, 4, config.outline); dot(3, -1, 1, 2, config.c2);   // Back
-            // Tail
             dot(-6, -2 + sway/p, 3, 4, config.outline);
             dot(-6, -1 + sway/p, 2, 2, config.c1);
-            // Eye
             dot(3, -1, 2, 2, config.outline); dot(3, -1, 1, 1, '#000');
+        }
+        else if (this.type === 'platy') {
+            // Deep, rounded body
+            dot(-4, -3, 8, 7, config.outline);
+            dot(-3, -2, 6, 5, config.c1);
+            dot(-2, -3, 4, 1, config.c1);
+            // Wagtail pattern (black fins/tail)
+            dot(-7, -3 + sway/p, 3, 6, config.c3); // Tail
+            dot(-1, -5, 2, 2, config.c3); // Top fin
+            // Eye
+            dot(3, -1, 1, 1, '#000');
+        }
+        else if (this.type === 'coralshrimp') {
+            // Banded body (red/white)
+            dot(-4, -1, 8, 3, config.outline);
+            dot(-4, 0, 2, 2, config.c2); // Red band
+            dot(-2, 0, 2, 2, config.c1); // White band
+            dot(0, 0, 2, 2, config.c2);  // Red band
+            dot(2, 0, 2, 2, config.c1);  // White band
+            // Massive white antennae
+            dot(3, -1, 6, 1, '#fff');
+            dot(3, -2, 5, 1, '#fff');
+            // Long banded claws
+            dot(1, 2, 4, 1, config.c2); dot(4, 3, 1, 2, config.c2); // Right claw
+            dot(-1, 2, 4, 1, config.c2); dot(-4, 3, 1, 2, config.c2); // Left claw
         }
         else if (this.type === 'pufferfish') {
             // Boxy Body
