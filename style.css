@@ -97,21 +97,27 @@ h1 {
 /* Game UI Controls */
 #game-ui {
     position: absolute;
-    bottom: 10px;
+    bottom: 20px;
     left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 8px;
-    z-index: 5;
+    gap: 15px;
+    z-index: 100; /* Force it above everything */
     flex-wrap: wrap;
-    padding: 0 10px;
+    padding: 10px;
+    pointer-events: auto;
 }
 
 .ui-btn {
-    padding: 5px 12px;
-    font-size: 1rem;
-    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    color: #fff;
+    font-family: 'VT323', monospace;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .hidden {
