@@ -1,0 +1,12 @@
+{
+  "name": "fish-simulator",
+  "version": "1.0.0",
+  "description": "Retro Fish Simulator",
+  "scripts": {
+    "dev": "npx browser-sync start --server --files \"*.html, *.css, *.js\"",
+    "sync": "git add . && git commit -m \"chore: update site\" && git push origin main && git checkout gh-pages && git merge main && git push origin gh-pages && git checkout main"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.0"
+  }
+}

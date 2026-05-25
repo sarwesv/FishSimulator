@@ -52,5 +52,25 @@ The project is organized into three core files for clean separation of concerns:
 - **Clean:** Tap the "CLEAN" button to clear debris and refresh the water.
 - **Reset:** Go back to the selection screen to choose a new fish.
 
+## 🛠️ Development
+
+To make it easier to see changes instantly while working on the code, I've added an auto-refresh development script.
+
+### 🔄 Live Auto-Refresh
+Run this command in your terminal while in the project folder:
+```bash
+npm run dev
+```
+This will:
+1. Start a local web server.
+2. Open the simulator in your browser.
+3. **Automatically refresh the page** every time you save a change to `index.html`, `style.css`, or `script.js`.
+
+### 🚀 Quick Deployment
+To push your changes to GitHub and sync the live website (`gh-pages`) in one go:
+```bash
+npm run sync
+```
+
 ---
 *Created with ❤️ for retro game enthusiasts.*
