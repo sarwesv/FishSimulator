@@ -493,6 +493,9 @@ function draw() {
 
 function handleStart(e) {
     const t = e.target;
+    // Prevent double triggering from touch+click
+    if (e.type === 'touchstart') e.preventDefault();
+
     if (t.classList.contains('selection-btn')) {
         const type = t.getAttribute('data-fish');
         if (selectedFishTypes.has(type)) { selectedFishTypes.delete(type); t.classList.remove('selected'); }
@@ -524,8 +527,6 @@ function handleStart(e) {
         document.getElementById('gravel-overlay').classList.add('hidden');
     }
     else if (t.id === 'close-gravel') document.getElementById('gravel-overlay').classList.add('hidden');
-
-    if (t.tagName === 'BUTTON' && e.cancelable) e.preventDefault();
 }
 
 function startGame() {
@@ -548,5 +549,5 @@ function resetGame() {
 }
 
 window.addEventListener('resize', resize);
-window.addEventListener('touchstart', handleStart, { passive: false });
-window.addEventListener('click', handleStart);
+// Using pointerdown for universal, single-trigger support
+window.addEventListener('pointerdown', handleStart);
