@@ -36,15 +36,20 @@ const GRAVEL_MAP = [];
 const FISH_TYPES = {
     goldfish: { c1: '#ff9500', c2: '#ffffff', c3: '#cc4400', outline: '#000000', size: 16, speed: 0.45 },
     angelfish: { c1: '#e0e0e0', c2: '#ffff00', c3: '#111111', outline: '#000000', size: 18, speed: 0.35 },
+    discus: { c1: '#ff66aa', c2: '#00ffff', c3: '#440066', outline: '#000000', size: 18, speed: 0.25 },
     koi: { c1: '#ffffff', c2: '#ffcc00', c3: '#cc0000', outline: '#000000', size: 20, speed: 0.3 },
     neon: { c1: '#00ccff', c2: '#ffffff', c3: '#ff0000', outline: '#000000', size: 12, speed: 0.9 },
+    danio: { c1: '#eeeeee', c2: '#4444ff', c3: '#ffffff', outline: '#000000', size: 12, speed: 1.2 },
     betta: { c1: '#660088', c2: '#ff0044', c3: '#220033', outline: '#000000', size: 16, speed: 0.2 },
     guppy: { c1: '#999999', c2: '#00ffcc', c3: '#ff66ff', outline: '#000000', size: 14, speed: 0.6 },
+    molly: { c1: '#222222', c2: '#ffffff', c3: '#ffcc00', outline: '#000000', size: 15, speed: 0.5 },
     pufferfish: { c1: '#ccaa77', c2: '#eeddcc', c3: '#553311', outline: '#000000', size: 15, speed: 0.25 },
     clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#000000', size: 14, speed: 0.55 },
+    bluetang: { c1: '#0044ff', c2: '#ffff00', c3: '#000000', outline: '#000000', size: 16, speed: 0.6 },
+    yellowtang: { c1: '#ffff00', c2: '#ffffff', c3: '#44aaff', outline: '#000000', size: 16, speed: 0.5 },
+    oscar: { c1: '#443322', c2: '#ff6600', c3: '#221100', outline: '#000000', size: 22, speed: 0.3 },
     platy: { c1: '#ff4400', c2: '#ffcc00', c3: '#000000', outline: '#000000', size: 14, speed: 0.5 },
     coralshrimp: { c1: '#ffffff', c2: '#ff0000', c3: '#ffffff', outline: '#000000', size: 12, speed: 0.35, habitat: 'bottom' },
-    yellowtang: { c1: '#ffff00', c2: '#ffffff', c3: '#44aaff', outline: '#000000', size: 16, speed: 0.5 },
     cory: { c1: '#887766', c2: '#554433', c3: '#332211', outline: '#000000', size: 15, speed: 0.3, habitat: 'bottom' },
     shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#000000', size: 10, speed: 0.4, habitat: 'bottom' },
     snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#000000', size: 12, speed: 0.1, habitat: 'bottom' }
@@ -55,7 +60,11 @@ const PLANT_TYPES = {
     fern: { color: '#228a44', height: 25 },
     grass: { color: '#3a9d23', height: 15 },
     kelp: { color: '#567d46', height: 60 },
-    anemone: { color: '#ff66aa', height: 20 }
+    anemone: { color: '#ff66aa', height: 20 },
+    sword: { color: '#44cc44', height: 35 },
+    moss: { color: '#115511', height: 12 },
+    hairgrass: { color: '#88dd88', height: 18 },
+    floater: { color: '#ff4444', height: 8, habitat: 'floating' }
 };
 
 // --- Game State ---
@@ -74,33 +83,62 @@ class Plant {
         this.type = type;
         const config = PLANT_TYPES[type] || PLANT_TYPES.seaweed;
         this.x = x;
-        this.y = GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 10;
+        this.y = (config.habitat === 'floating') ? 10 : (GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 10);
         this.height = config.height * (0.8 + Math.random() * 0.4);
         this.offset = Math.random() * 10;
         this.color = config.color;
     }
     draw() {
+        ctx.save();
         if (this.type === 'anemone') {
-            ctx.save();
             ctx.translate(Math.floor(this.x), Math.floor(this.y));
             // Fleshy Base
             ctx.fillStyle = '#aa4477';
-            ctx.fillRect(-5, -4, 10, 4);
-            ctx.fillRect(-6, -2, 12, 2);
-            // Crown of Tentacles
-            ctx.fillStyle = this.color;
-            for (let i = 0; i < 8; i++) {
-                const angle = (i / 7) * Math.PI - Math.PI; // Radiate upwards
-                const sway = Math.sin(Date.now() * 0.002 + this.offset + i) * 4;
-                const dist = 8 + sway;
-                const tx = Math.floor(Math.cos(angle) * dist);
-                const ty = Math.floor(Math.sin(angle) * dist) - 4;
-                
-                ctx.fillRect(tx - 1, ty - 1, 3, 3); // Tentacle tip
-                // Connection dots for blocky look
-                ctx.fillRect(Math.floor(tx/2) - 1, Math.floor(ty/2) - 2, 2, 2);
+            ctx.fillRect(-5, -3, 10, 3);
+            // Tentacles as Lines
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 10; i++) {
+                const angle = (i / 9) * Math.PI - Math.PI; 
+                const sway = Math.sin(Date.now() * 0.002 + this.offset + i) * 3;
+                const dist = 7 + sway;
+                ctx.beginPath();
+                ctx.moveTo(0, -2);
+                ctx.lineTo(Math.cos(angle) * dist, Math.sin(angle) * dist - 2);
+                ctx.stroke();
             }
-            ctx.restore();
+        } else if (this.type === 'sword') {
+            ctx.fillStyle = this.color;
+            for (let i = -1; i <= 1; i++) {
+                const sway = Math.sin(Date.now() * 0.001 + this.offset + i) * 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x + i * 4, this.y);
+                ctx.quadraticCurveTo(this.x + i * 8 + sway, this.y - this.height * 0.5, this.x + i * 2 + sway, this.y - this.height);
+                ctx.lineTo(this.x + i * 2 + sway + 4, this.y - this.height);
+                ctx.fill();
+            }
+        } else if (this.type === 'moss') {
+            ctx.fillStyle = this.color;
+            for (let i = 0; i < 5; i++) {
+                ctx.fillRect(this.x - 6 + i * 3, this.y - 4 + Math.sin(i) * 2, 4, 4);
+            }
+        } else if (this.type === 'hairgrass') {
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
+                const ox = (i - 3) * 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x + ox, this.y);
+                ctx.lineTo(this.x + ox + Math.sin(Date.now() * 0.003 + i) * 2, this.y - this.height);
+                ctx.stroke();
+            }
+        } else if (this.type === 'floater') {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x - 4, this.y - 2, 8, 3); // Leaf
+            ctx.fillStyle = '#88dd88';
+            ctx.fillRect(this.x - 2, this.y - 3, 4, 1);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath(); ctx.moveTo(this.x, this.y + 1); ctx.lineTo(this.x, this.y + 6); ctx.stroke(); // Root
         } else {
             ctx.fillStyle = this.color;
             const segments = 4;
@@ -110,6 +148,7 @@ class Plant {
                 ctx.fillRect(Math.floor(this.x + sway - 2), Math.floor(this.y - (i + 1) * sh), 4, Math.floor(sh + 1));
             }
         }
+        ctx.restore();
     }
 }
 
@@ -243,14 +282,58 @@ class Fish {
 
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
-        if (this.type === 'yellowtang') {
+        else if (this.type === 'yellowtang') {
+            // Chunky body with thick outlines (Matching Reference)
             dot(-4, -4, 9, 9, config.outline);
             dot(-3, -3, 7, 7, config.c1);
-            dot(2, -2, 2, 4, config.c2); // White Face
+            // Face region
+            dot(2, -2, 2, 4, config.c2); // White face
+            // Fins (Blue as in reference)
             dot(-2, -5, 4, 1, config.c3); // Dorsal
             dot(-2, 4, 4, 1, config.c3);  // Anal
             dot(-7, -2 + sway/p, 3, 5, config.c3); // Tail
+            // Eye
+            dot(3, -2, 1, 1, '#000');
+        }
+        else if (this.type === 'bluetang') {
+            dot(-6, -4, 12, 9, config.outline);
+            dot(-5, -3, 10, 7, config.c1);
+            dot(-3, -2, 6, 4, config.c3); // Black "palette" pattern
+            dot(4, 0, 2, 2, config.c2);   // Yellow tail spot
+            dot(-8, -2 + sway/p, 3, 5, config.c2); // Yellow Tail
+            dot(4, -2, 1, 1, '#000'); // Eye
+        }
+        else if (this.type === 'discus') {
+            dot(-4, -6, 9, 13, config.outline);
+            dot(-3, -5, 7, 11, config.c1);
+            dot(-1, -4, 2, 9, config.c2); // Bright vertical pattern
+            dot(1, -3, 1, 7, config.c3);
+            dot(-7, -2 + sway/p, 3, 5, config.outline);
             dot(3, -2, 1, 1, '#000'); // Eye
+        }
+        else if (this.type === 'danio') {
+            dot(-6, -2, 13, 5, config.outline);
+            dot(-5, -1, 11, 3, config.c1);
+            dot(-5, -1, 11, 1, config.c2); // Blue Stripe
+            dot(-5, 1, 11, 1, config.c2);  // Blue Stripe
+            dot(-8, -2 + sway/p, 3, 5, config.outline);
+            dot(5, -1, 1, 1, '#000'); // Eye
+        }
+        else if (this.type === 'oscar') {
+            dot(-7, -5, 15, 11, config.outline);
+            dot(-6, -4, 13, 9, config.c1);
+            dot(-2, -3, 4, 6, config.c2); // Orange blotch
+            dot(-8, -1, 2, 2, config.c2); // Eye spot on tail
+            dot(-10, -3 + sway/p, 4, 7, config.outline);
+            dot(5, -2, 2, 2, '#000'); // Eye
+        }
+        else if (this.type === 'molly') {
+            dot(-5, -3, 10, 7, config.outline);
+            dot(-4, -2, 8, 5, config.c1);
+            dot(-1, -6, 5, 4, config.outline); // Sailfin
+            dot(0, -5, 3, 2, config.c2);
+            dot(-8, -3 + sway/p, 4, 7, config.outline);
+            dot(4, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'clownfish') {
             dot(-5, -3, 10, 7, config.outline);
