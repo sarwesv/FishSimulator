@@ -6,13 +6,13 @@
 // --- Constants & Config ---
 const CANVAS_WIDTH = 120;
 const CANVAS_HEIGHT = 75;
-const FRICTION = 0.98;
+const FRICTION = 0.98; // High friction for more "underwater" feel
 
 const FISH_TYPES = {
-    goldfish: { color: '#ff9900', size: 7, speed: 0.5 },
-    neon: { color: '#4444ff', size: 5, speed: 0.8 }, // Brighter blue
-    betta: { color: '#cc0022', size: 9, speed: 0.3 },
-    koi: { color: '#f5f5dc', size: 10, speed: 0.4 } 
+    goldfish: { color: '#ff9900', size: 7, speed: 0.25, turnRate: 0.02 },
+    neon: { color: '#4444ff', size: 5, speed: 0.4, turnRate: 0.03 },
+    betta: { color: '#cc0022', size: 9, speed: 0.15, turnRate: 0.015 },
+    koi: { color: '#f5f5dc', size: 10, speed: 0.2, turnRate: 0.02 } 
 };
 
 // --- Game State ---
@@ -29,19 +29,20 @@ ctx.imageSmoothingEnabled = false;
 // --- Entities ---
 
 class Bubble {
-    constructor(x, y) {
+    constructor(x, y, isBig = false) {
         this.x = x;
         this.y = y;
         this.vx = (Math.random() - 0.5) * 0.1;
-        this.vy = -Math.random() * 0.2 - 0.1;
-        this.size = Math.random() * 0.8 + 0.4;
-        this.life = 80;
+        this.vy = -Math.random() * 0.15 - 0.05;
+        this.size = isBig ? (Math.random() * 1.5 + 1) : (Math.random() * 0.8 + 0.4);
+        this.life = isBig ? 120 : 80;
     }
     update() {
         this.x += this.vx; this.y += this.vy; this.life--;
+        this.vx += Math.sin(this.life * 0.1) * 0.01; // Slight wobble
     }
     draw() {
-        ctx.fillStyle = 'rgba(150, 200, 255, 0.15)';
+        ctx.fillStyle = 'rgba(150, 200, 255, 0.2)';
         ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
     }
 }
@@ -75,8 +76,9 @@ class Fish {
         this.vx = 0; this.vy = 0;
         this.targetX = this.x; this.targetY = this.y;
         this.flip = false;
-        this.bubbleTimer = 0;
+        this.bubbleTimer = Math.random() * 200;
         this.animTimer = 0;
+        this.idleTimer = 0;
         
         if (type === 'koi') {
             this.pattern = [];
@@ -92,32 +94,60 @@ class Fish {
     }
 
     update() {
-        this.animTimer += 0.15;
-        if (Math.abs(this.x - this.targetX) < 5 && Math.abs(this.y - this.targetY) < 5) {
-            this.targetX = 15 + Math.random() * (CANVAS_WIDTH - 30);
-            this.targetY = 15 + Math.random() * (CANVAS_HEIGHT - 30);
-        }
-        let dx = this.targetX - this.x;
-        let dy = this.targetY - this.y;
-        let dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 1) {
-            this.vx += (dx / dist) * this.config.speed * 0.04;
-            this.vy += (dy / dist) * this.config.speed * 0.04;
-        }
-        this.vx *= FRICTION; this.vy *= FRICTION;
-        this.x += this.vx; this.y += this.vy;
-        if (this.vx > 0.01) this.flip = false;
-        if (this.vx < -0.01) this.flip = true;
+        this.animTimer += 0.08; // Slower animation
+        
+        if (this.idleTimer > 0) {
+            this.idleTimer--;
+            this.vx *= 0.95;
+            this.vy *= 0.95;
+        } else {
+            // AI: Choose new target occasionally or when reached
+            if (Math.abs(this.x - this.targetX) < 10 && Math.abs(this.y - this.targetY) < 10) {
+                if (Math.random() < 0.02) { // Chance to idle
+                    this.idleTimer = 60 + Math.random() * 120;
+                } else {
+                    this.targetX = 20 + Math.random() * (CANVAS_WIDTH - 40);
+                    this.targetY = 20 + Math.random() * (CANVAS_HEIGHT - 40);
+                }
+            }
 
+            let dx = this.targetX - this.x;
+            let dy = this.targetY - this.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > 1) {
+                // Gentle acceleration
+                this.vx += (dx / dist) * this.config.speed * this.config.turnRate;
+                this.vy += (dy / dist) * this.config.speed * this.config.turnRate;
+            }
+        }
+
+        this.vx *= FRICTION; 
+        this.vy *= FRICTION;
+        this.x += this.vx; 
+        this.y += this.vy;
+
+        // Facing direction with buffer to prevent flickering
+        if (this.vx > 0.05) this.flip = false;
+        if (this.vx < -0.05) this.flip = true;
+
+        // Interaction: Eat food
         foods.forEach((f, index) => {
             let fdx = f.x - this.x; let fdy = f.y - this.y;
             if (Math.sqrt(fdx * fdx + fdy * fdy) < this.config.size) foods.splice(index, 1);
         });
 
-        this.bubbleTimer++;
-        if (this.bubbleTimer > 200 + Math.random() * 300) {
-            bubbles.push(new Bubble(this.x + (this.flip ? -3 : 3), this.y));
-            this.bubbleTimer = 0;
+        // Bubble blowing (Occasional feature)
+        this.bubbleTimer--;
+        if (this.bubbleTimer <= 0) {
+            // Blow 1-3 bubbles
+            const count = Math.floor(Math.random() * 3) + 1;
+            for(let i=0; i<count; i++) {
+                setTimeout(() => {
+                    bubbles.push(new Bubble(this.x + (this.flip ? -3 : 3), this.y - 1, true));
+                }, i * 300);
+            }
+            this.bubbleTimer = 300 + Math.random() * 600; // Next burst in 5-15 seconds
         }
     }
 
@@ -127,66 +157,54 @@ class Fish {
         if (this.flip) ctx.scale(-1, 1);
         
         const s = this.config.size;
-        const tailWobble = Math.sin(this.animTimer) * 2;
+        // Tail movement depends on speed
+        const speedFactor = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 2;
+        const tailWobble = Math.sin(this.animTimer) * (1 + speedFactor);
         
         ctx.fillStyle = this.config.color;
 
         if (this.type === 'goldfish') {
-            // Body
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.6, 0, 0, Math.PI*2); ctx.fill();
-            // Tail (Flowing)
             ctx.beginPath();
             ctx.moveTo(-s+2, 0);
             ctx.quadraticCurveTo(-s-4, -s*0.8 + tailWobble, -s-6, -s*0.4);
             ctx.lineTo(-s-6, s*0.4);
             ctx.quadraticCurveTo(-s-4, s*0.8 - tailWobble, -s+2, 0);
             ctx.fill();
-            // Top Fin
             ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.5); ctx.lineTo(-s*0.6, -s*0.8); ctx.lineTo(-s, -s*0.4); ctx.fill();
         } 
         else if (this.type === 'neon') {
-            // Body (Streamlined)
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
-            // Neon Stripe
             ctx.fillStyle = '#00ffff';
             ctx.fillRect(-s*0.5, -1, s, 1.5);
-            // Red Tail
             ctx.fillStyle = '#ff3333';
             ctx.beginPath(); ctx.moveTo(-s+1, 0); ctx.lineTo(-s-3, -s*0.4 + tailWobble/2); ctx.lineTo(-s-3, s*0.4 - tailWobble/2); ctx.fill();
         }
         else if (this.type === 'betta') {
-            // Body
             ctx.beginPath(); ctx.ellipse(0, 0, s*0.7, s*0.3, 0, 0, Math.PI*2); ctx.fill();
-            // Massive Flowing Tail
             ctx.fillStyle = '#990011';
             ctx.beginPath();
             ctx.moveTo(-s*0.5, 0);
             ctx.bezierCurveTo(-s*1.5, -s*1.2 + tailWobble, -s*2.5, -s*0.5, -s*2.5, 0);
             ctx.bezierCurveTo(-s*2.5, s*0.5, -s*1.5, s*1.2 - tailWobble, -s*0.5, 0);
             ctx.fill();
-            // Long Fins
             ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.quadraticCurveTo(-s*0.5, -s*1.2, -s, -s*0.5); ctx.fill();
             ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.quadraticCurveTo(-s*0.5, s*1.2, -s, s*0.5); ctx.fill();
         }
         else if (this.type === 'koi') {
-            // Body (Longer)
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
-            // Pattern
             this.pattern.forEach(p => {
                 ctx.fillStyle = p.c;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
             });
-            // Tail
             ctx.fillStyle = this.config.color;
             ctx.beginPath(); ctx.moveTo(-s+2, 0); ctx.lineTo(-s-4, -s*0.5 + tailWobble); ctx.lineTo(-s-4, s*0.5 - tailWobble); ctx.fill();
-            // Barbels (Whiskers)
             ctx.strokeStyle = this.config.color;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(s-1, 1); ctx.lineTo(s+2, 3); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(s-1, -1); ctx.lineTo(s+2, -3); ctx.stroke();
         }
 
-        // Integrated Eye
         ctx.fillStyle = '#000';
         ctx.fillRect(s*0.5, -1, 1, 1);
         ctx.restore();
