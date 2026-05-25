@@ -1,6 +1,6 @@
 /**
  * Fish Simulator
- * Rounded 8-Bit Retro Sprite Simulation
+ * Strict 'Pixel Fishing' Style 8-Bit Simulation
  */
 
 // --- Dynamic Resolution ---
@@ -27,15 +27,15 @@ function resize() {
 
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
-    goldfish: { color: '#ff9900', pattern: '#ffffff', size: 16, speed: 0.4 },
-    neon: { color: '#0000ff', pattern: '#00ffff', size: 14, speed: 0.8 },
-    betta: { color: '#ff0044', pattern: '#aa0022', size: 18, speed: 0.2 },
-    koi: { color: '#eeeeee', pattern: '#ff4400', size: 24, speed: 0.35 },
-    angelfish: { color: '#dddddd', pattern: '#444444', size: 20, speed: 0.3 },
-    guppy: { color: '#00ffcc', pattern: '#ff00ff', size: 14, speed: 0.6 },
-    cory: { color: '#887755', pattern: '#443322', size: 16, speed: 0.3, habitat: 'bottom' },
-    shrimp: { color: '#ff3333', pattern: '#ffffff', size: 10, speed: 0.4, habitat: 'bottom' },
-    snail: { color: '#996633', pattern: '#663300', size: 12, speed: 0.1, habitat: 'bottom' }
+    goldfish: { color: '#ff9900', secondary: '#ffffff', size: 10, speed: 0.4 },
+    neon: { color: '#0000ff', secondary: '#00ffff', size: 10, speed: 0.8 },
+    betta: { color: '#ff0044', secondary: '#aa0022', size: 12, speed: 0.2 },
+    koi: { color: '#eeeeee', secondary: '#ff4400', size: 14, speed: 0.35 },
+    angelfish: { color: '#dddddd', secondary: '#444444', size: 12, speed: 0.3 },
+    guppy: { color: '#00ffcc', secondary: '#ff00ff', size: 10, speed: 0.6 },
+    cory: { color: '#887755', secondary: '#443322', size: 10, speed: 0.3, habitat: 'bottom' },
+    shrimp: { color: '#ff3333', secondary: '#ffffff', size: 8, speed: 0.4, habitat: 'bottom' },
+    snail: { color: '#996633', secondary: '#663300', size: 10, speed: 0.1, habitat: 'bottom' }
 };
 
 // --- Game State ---
@@ -58,7 +58,7 @@ class Plant {
         this.offset = Math.random() * 10;
     }
     draw() {
-        ctx.fillStyle = '#228822';
+        ctx.fillStyle = '#1e7b1e';
         const segments = 4;
         const sh = this.height / segments;
         for (let i = 0; i < segments; i++) {
@@ -94,9 +94,10 @@ class Fish {
         this.flip = false;
         this.animTimer = Math.random() * 10;
         this.idleTimer = 0;
+        
         if (type === 'koi') {
             this.spots = [];
-            for(let i=0; i<3; i++) this.spots.push({x: (Math.random()-0.5)*1.2, y: (Math.random()-0.5)*0.4});
+            for(let i=0; i<4; i++) this.spots.push({x: Math.random(), y: Math.random()});
         }
     }
 
@@ -133,108 +134,102 @@ class Fish {
         if (this.vx < -0.05) this.flip = true;
 
         foods.forEach((f, i) => {
-            if (Math.abs(f.x - this.x) < this.config.size/2 && Math.abs(f.y - this.y) < this.config.size/4) foods.splice(i, 1);
+            if (Math.abs(f.x - this.x) < 8 && Math.abs(f.y - this.y) < 4) foods.splice(i, 1);
         });
     }
 
     draw() {
-        const s = this.config.size;
-        const p = s / 8; 
-        const sway = Math.floor(Math.sin(this.animTimer * 1.5) * 2) * p;
-        
         ctx.save();
         ctx.translate(Math.floor(this.x), Math.floor(this.y));
         if (this.flip) ctx.scale(-1, 1);
 
+        // Helper to draw a precise 'dot' pixel
         const dot = (x, y, w, h, c) => {
             ctx.fillStyle = c;
-            ctx.fillRect(Math.floor(x * p), Math.floor(y * p), Math.floor(w * p), Math.floor(h * p));
+            ctx.fillRect(x, y, w, h);
         };
 
         const c = this.config.color;
-        const pt = this.config.pattern;
+        const s = this.config.secondary;
+        const sway = Math.floor(Math.sin(this.animTimer * 1.5) * 2);
 
-        // --- ROUNDED 8-BIT FISH ---
+        // --- 'PIXEL FISHING' STYLE RE-IMPLEMENTATION ---
+        
         if (this.type === 'goldfish') {
-            // Rounded Body
-            dot(-3, -3, 6, 6, c);
-            dot(-4, -2, 8, 4, c);
-            dot(-2, -4, 4, 8, c);
+            // Chunky 8x5 body
+            dot(-4, -2, 8, 5, c);
+            dot(-3, -3, 6, 1, c); // Top curve
+            dot(-3, 3, 6, 1, c);  // Bottom curve
             // Tail
-            dot(-6, -4 + sway/p, 3, 8, pt);
+            dot(-6, -3 + sway, 2, 6, s);
+            // Eye
+            dot(2, -1, 2, 2, '#000');
         } 
         else if (this.type === 'koi') {
-            // Rounded Torpedo
-            dot(-7, -2, 14, 4, c);
-            dot(-8, -1, 16, 2, c);
-            dot(-6, -3, 12, 6, c);
-            
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(Math.floor(-7 * p), Math.floor(-2 * p), Math.floor(14 * p), Math.floor(4 * p));
-            ctx.rect(Math.floor(-8 * p), Math.floor(-1 * p), Math.floor(16 * p), Math.floor(2 * p));
-            ctx.rect(Math.floor(-6 * p), Math.floor(-3 * p), Math.floor(12 * p), Math.floor(6 * p));
-            ctx.clip();
-            this.spots.forEach(sp => dot(sp.x*8, sp.y*8, 3, 3, pt));
-            ctx.restore();
-
+            // Long torpedo 12x4 body
+            dot(-6, -2, 12, 4, c);
+            dot(-5, -3, 10, 1, c);
+            dot(-5, 2, 10, 1, c);
+            // Patterns
+            this.spots.forEach(sp => dot(Math.floor(sp.x*10 - 5), Math.floor(sp.y*3 - 2), 2, 2, s));
             // Tail
-            dot(-11, -3 + sway/p, 3, 6, c);
+            dot(-8, -2 + sway, 2, 4, c);
+            // Eye
+            dot(4, -1, 1, 1, '#000');
         }
         else if (this.type === 'betta') {
-            // Slender Round Body
-            dot(-3, -2, 6, 4, c);
-            dot(-4, -1, 8, 2, c);
-            // Round Fins
-            dot(-1, -6 + sway/p*0.5, 3, 5, pt);
-            dot(-1, 1 - sway/p*0.5, 3, 5, pt);
-            // Round Tail
-            dot(-8, -4 + sway/p, 5, 8, pt);
-            dot(-9, -2 + sway/p, 7, 4, pt);
+            // Slender body with massive square fins
+            dot(-3, -1, 6, 2, c);
+            // Dorsal (Top)
+            dot(-2, -6 + sway/2, 5, 5, s);
+            // Anal (Bottom)
+            dot(-2, 1 - sway/2, 5, 5, s);
+            // Tail
+            dot(-8, -4 + sway, 5, 8, s);
+            // Eye
+            dot(1, -1, 1, 1, '#000');
         }
         else if (this.type === 'neon') {
-            // Small Sleek Round
-            dot(-5, -2, 10, 4, c);
-            dot(-6, -1, 12, 2, c);
-            dot(-5, 0, 9, 1, pt); // Stripe
+            // Skinny 9x2 body
+            dot(-5, -1, 10, 2, c);
+            dot(-5, -1, 8, 1, s); // Glowing stripe
             // Tail
-            dot(-8, -2 + sway/p*0.5, 2, 4, '#ff0000');
+            dot(-7, -2 + sway/2, 2, 4, '#ff0000');
+            // Eye
+            dot(3, -1, 1, 1, '#000');
         }
         else if (this.type === 'angelfish') {
-            // Tall Round Diamond
+            // Diamond 8x12 body
             dot(-1, -6, 2, 12, c);
             dot(-3, -3, 6, 6, c);
-            dot(-4, -1, 8, 2, c);
-            dot(0, -4, 1, 8, pt);
+            dot(-2, -4, 4, 8, c);
+            dot(0, -5, 1, 10, s); // Vertical stripe
             // Tail
-            dot(-6, -1, 4, 2, c);
+            dot(-5, -1 + sway/2, 3, 2, c);
+            // Eye
+            dot(0, -2, 1, 1, '#000');
         }
         else if (this.type === 'guppy') {
-            dot(-2, -2, 4, 4, c);
-            dot(-3, -1, 6, 2, c);
-            dot(-7, -4 + sway/p, 5, 8, pt);
+            dot(-2, -1, 4, 2, c);
+            dot(-6, -4 + sway, 4, 8, s); // Huge fan tail
+            dot(1, -1, 1, 1, '#000');
         }
         else if (this.type === 'cory') {
-            dot(-4, -2, 8, 4, c);
-            dot(-3, -3, 6, 6, c);
-            dot(-7, -1 + sway/p*0.5, 3, 2, pt);
+            dot(-3, -2, 6, 4, c);
+            dot(-4, -1, 8, 2, c);
+            dot(-5, -1 + sway/2, 2, 2, s); // Tail
+            dot(1, 0, 1, 1, '#000');
         }
         else if (this.type === 'shrimp') {
-            dot(-4, -1, 8, 3, c);
-            dot(-5, 0, 10, 1, c);
-            dot(-2, 2, 1, 2, '#fff');
-            dot(2, 2, 1, 2, '#fff');
+            dot(-4, 0, 8, 1, c);
+            dot(3, 0, 2, 1, c);
+            dot(-2, 1, 1, 1, '#fff'); // Legs
+            dot(1, 1, 1, 1, '#fff');
         }
         else if (this.type === 'snail') {
-            // Round Shell
-            dot(-3, -3, 6, 6, c);
-            dot(-4, -2, 8, 4, c);
-            dot(-5, 1, 10, 2, '#ccaa88'); // Foot
-        }
-
-        // 8-bit Eye
-        if (this.type !== 'snail') {
-            dot(this.type === 'angelfish' ? 0 : 3, -2, 2, 2, '#000');
+            dot(-3, -2, 6, 4, c); // Shell
+            dot(-4, -1, 8, 2, c);
+            dot(-4, 2, 8, 1, '#ccaa88'); // Foot
         }
 
         ctx.restore();
@@ -254,7 +249,7 @@ function update() {
 
 function draw() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    let b = 255 - (gravelDebris * 1.2); let g = 180 - (gravelDebris * 0.5);
+    let b = 255 - (gravelDebris * 1.5); let g = 180 - (gravelDebris * 0.5);
     ctx.fillStyle = `rgb(0, ${g}, ${b})`;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
