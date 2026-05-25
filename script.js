@@ -9,10 +9,10 @@ const CANVAS_HEIGHT = 300;
 const FRICTION = 0.98;
 
 const FISH_TYPES = {
-    goldfish: { color: '#ff9900', size: 28, speed: 0.5, turnRate: 0.02 },
-    neon: { color: '#4444ff', size: 20, speed: 0.8, turnRate: 0.03 },
-    betta: { color: '#cc0022', size: 36, speed: 0.3, turnRate: 0.015 },
-    koi: { color: '#f5f5dc', size: 40, speed: 0.4, turnRate: 0.02 } 
+    goldfish: { color: '#ff9900', shadow: '#cc7700', highlight: '#ffbb33', size: 28, speed: 0.5, turnRate: 0.02 },
+    neon: { color: '#4444ff', shadow: '#2222aa', highlight: '#8888ff', size: 20, speed: 0.8, turnRate: 0.03 },
+    betta: { color: '#cc0022', shadow: '#880011', highlight: '#ff3355', size: 32, speed: 0.3, turnRate: 0.015 },
+    koi: { color: '#f5f5dc', shadow: '#d2d2b4', highlight: '#ffffff', size: 40, speed: 0.4, turnRate: 0.02 } 
 };
 
 // --- Game State ---
@@ -117,12 +117,12 @@ class Fish {
         
         if (type === 'koi') {
             this.pattern = [];
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<8; i++) {
                 this.pattern.push({
-                    x: Math.random() * 32 - 16,
-                    y: Math.random() * 12 - 6,
-                    r: Math.random() * 8 + 4,
-                    c: Math.random() > 0.5 ? '#ff4400' : '#000000'
+                    x: Math.random() * 30 - 15,
+                    y: Math.random() * 10 - 5,
+                    r: Math.random() * 6 + 3,
+                    c: Math.random() > 0.4 ? '#ff4400' : '#222222'
                 });
             }
         }
@@ -177,13 +177,13 @@ class Fish {
 
         this.bubbleTimer--;
         if (this.bubbleTimer <= 0) {
-            const count = Math.floor(Math.random() * 3) + 1;
+            const count = Math.floor(Math.random() * 2) + 1;
             for(let i=0; i<count; i++) {
                 setTimeout(() => {
                     bubbles.push(new Bubble(this.x + (this.flip ? -12 : 12), this.y - 4, true));
                 }, i * 300);
             }
-            this.bubbleTimer = 300 + Math.random() * 600;
+            this.bubbleTimer = 300 + Math.random() * 800;
         }
     }
 
@@ -199,49 +199,113 @@ class Fish {
         ctx.fillStyle = this.config.color;
 
         if (this.type === 'goldfish') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.6, 0, 0, Math.PI*2); ctx.fill();
+            // Body (Egg shaped)
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.75, 0, 0, Math.PI*2); ctx.fill();
+            // Shadow & Highlight
+            ctx.fillStyle = this.config.shadow;
+            ctx.beginPath(); ctx.ellipse(0, s*0.2, s*0.8, s*0.4, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = this.config.highlight;
+            ctx.beginPath(); ctx.ellipse(0, -s*0.2, s*0.6, s*0.2, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Fins
+            ctx.fillStyle = this.config.color;
+            // Dorsal
+            ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.6); ctx.quadraticCurveTo(-s*0.8, -s*1.2, -s, -s*0.4); ctx.fill();
+            // Pectoral
+            ctx.beginPath(); ctx.ellipse(s*0.2, s*0.3, s*0.4, s*0.2, 0.5, 0, Math.PI*2); ctx.fill();
+            
+            // Tail (Flowing double tail look)
             ctx.beginPath();
-            ctx.moveTo(-s+8, 0);
-            ctx.quadraticCurveTo(-s-16, -s*0.8 + tailWobble, -s-24, -s*0.4);
-            ctx.lineTo(-s-24, s*0.4);
-            ctx.quadraticCurveTo(-s-16, s*0.8 - tailWobble, -s+8, 0);
+            ctx.moveTo(-s+6, 0);
+            ctx.bezierCurveTo(-s-12, -s*1.2 + tailWobble, -s-28, -s*0.8, -s-20, 0);
+            ctx.bezierCurveTo(-s-28, s*0.8 - tailWobble, -s-12, s*1.2, -s+6, 0);
             ctx.fill();
-            ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.5); ctx.lineTo(-s*0.6, -s*0.8); ctx.lineTo(-s, -s*0.4); ctx.fill();
         } 
         else if (this.type === 'neon') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            // Body (Sleek)
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.3, 0, 0, Math.PI*2); ctx.fill();
+            // Shadow
+            ctx.fillStyle = this.config.shadow;
+            ctx.beginPath(); ctx.ellipse(0, s*0.15, s, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Neon Stripe (Cyan Glow)
             ctx.fillStyle = '#00ffff';
-            ctx.fillRect(-s*0.5, -4, s, 6);
+            ctx.fillRect(-s*0.6, -2, s*1.2, 4);
+            // Lower Body Red
+            ctx.fillStyle = '#ff2222';
+            ctx.beginPath(); ctx.ellipse(-s*0.2, s*0.1, s*0.6, s*0.15, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Tail
             ctx.fillStyle = '#ff3333';
-            ctx.beginPath(); ctx.moveTo(-s+4, 0); ctx.lineTo(-s-12, -s*0.4 + tailWobble/2); ctx.lineTo(-s-12, s*0.4 - tailWobble/2); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-s+2, 0); ctx.lineTo(-s-12, -s*0.6 + tailWobble/2); ctx.lineTo(-s-12, s*0.6 - tailWobble/2); ctx.fill();
+            // Tiny Fins
+            ctx.beginPath(); ctx.moveTo(0, -s*0.3); ctx.lineTo(-s*0.4, -s*0.6); ctx.lineTo(-s*0.2, -s*0.3); ctx.fill();
         }
         else if (this.type === 'betta') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s*0.7, s*0.3, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#cc0022';
+            // Body (Tapered)
             ctx.beginPath();
-            ctx.moveTo(-s*0.5, 0);
-            ctx.bezierCurveTo(-s*1.5, -s*1.2 + tailWobble, -s*2.5, -s*0.5, -s*2.5, 0);
-            ctx.bezierCurveTo(-s*2.5, s*0.5, -s*1.5, s*1.2 - tailWobble, -s*0.5, 0);
+            ctx.moveTo(s*0.6, 0);
+            ctx.quadraticCurveTo(0, -s*0.4, -s*0.8, 0);
+            ctx.quadraticCurveTo(0, s*0.4, s*0.6, 0);
             ctx.fill();
-            ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.quadraticCurveTo(-s*0.5, -s*1.2, -s, -s*0.5); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.quadraticCurveTo(-s*0.5, s*1.2, -s, s*0.5); ctx.fill();
+            
+            // Flowing Drapery Fins
+            ctx.fillStyle = this.config.shadow;
+            // Dorsal
+            ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.bezierCurveTo(-s, -s*2 + tailWobble, -s*2, -s, -s*0.8, -s*0.2); ctx.fill();
+            // Anal
+            ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.bezierCurveTo(-s, s*2 - tailWobble, -s*2, s, -s*0.8, s*0.2); ctx.fill();
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(-s*0.8, 0);
+            ctx.bezierCurveTo(-s*3, -s*1.5 + tailWobble, -s*3, s*1.5 - tailWobble, -s*0.8, 0);
+            ctx.fill();
+            
+            // Pectoral (Side)
+            ctx.fillStyle = this.config.highlight;
+            ctx.beginPath(); ctx.ellipse(s*0.2, 0, s*0.5, s*0.2, 0.2, 0, Math.PI*2); ctx.fill();
         }
         else if (this.type === 'koi') {
+            // Body (Longer Torpedo)
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            // Shadow & Highlight
+            ctx.fillStyle = this.config.shadow;
+            ctx.beginPath(); ctx.ellipse(0, s*0.15, s, s*0.15, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = this.config.highlight;
+            ctx.beginPath(); ctx.ellipse(0, -s*0.15, s*0.6, s*0.1, 0, 0, Math.PI*2); ctx.fill();
+
+            // Pattern Spots
             this.pattern.forEach(p => {
                 ctx.fillStyle = p.c;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
             });
+            
+            // Fins
             ctx.fillStyle = this.config.color;
-            ctx.beginPath(); ctx.moveTo(-s+8, 0); ctx.lineTo(-s-16, -s*0.5 + tailWobble); ctx.lineTo(-s-16, s*0.5 - tailWobble); ctx.fill();
-            ctx.strokeStyle = this.config.color;
-            ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(s-4, 4); ctx.lineTo(s+8, 12); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(s-4, -4); ctx.lineTo(s+8, -12); ctx.stroke();
+            // Pectoral Fins (Wide)
+            ctx.beginPath(); ctx.ellipse(s*0.2, s*0.3, s*0.5, s*0.2, 0.4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(s*0.2, -s*0.3, s*0.5, s*0.2, -0.4, 0, Math.PI*2); ctx.fill();
+            // Tail
+            ctx.beginPath(); ctx.moveTo(-s+6, 0); ctx.lineTo(-s-14, -s*0.7 + tailWobble); ctx.lineTo(-s-14, s*0.7 - tailWobble); ctx.fill();
+            
+            // Barbels (Whiskers)
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(s-4, 2); ctx.quadraticCurveTo(s+8, 8, s+4, 12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s-4, -2); ctx.quadraticCurveTo(s+8, -8, s+4, -12); ctx.stroke();
         }
 
+        // Eye Detail
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.6, -2, 4, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#000';
-        ctx.fillRect(s*0.5, -4, 4, 4);
+        ctx.beginPath(); ctx.arc(s*0.65, -2, 2.5, 0, Math.PI*2); ctx.fill();
+        
+        // Gill Plate
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(s*0.3, 0, s*0.3, -Math.PI/2, Math.PI/2); ctx.stroke();
+
         ctx.restore();
     }
 }
