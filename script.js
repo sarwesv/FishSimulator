@@ -132,6 +132,10 @@ class Fish {
     constructor(type) {
         this.type = type;
         this.config = FISH_TYPES[type] || FISH_TYPES.goldfish;
+        
+        // --- Instance Specific Colors (Koi Diversity) ---
+        this.baseColor = this.config.c1;
+        
         // Spawn centered in the tank using latest dimensions
         this.x = CANVAS_WIDTH / 2 + (Math.random() - 0.5) * 40;
         this.y = CANVAS_HEIGHT / 2 + (Math.random() - 0.5) * 40;
@@ -144,14 +148,19 @@ class Fish {
         this.mouthTimer = 0;
         
         if (type === 'koi') {
+            // Randomize Koi base from a pool of authentic colors
+            const basePool = ['#ffffff', '#ffffff', '#ffcc00', '#222222', '#ff9500'];
+            this.baseColor = basePool[Math.floor(Math.random() * basePool.length)];
+            
             this.spots = [];
-            for(let i=0; i<5; i++) {
+            const spotPool = ['#cc0000', '#111111', '#ffffff', '#ff6600'];
+            for(let i=0; i<6; i++) {
                 this.spots.push({
                     x: (Math.random() - 0.5) * 1.2,
                     y: (Math.random() - 0.5) * 0.5,
-                    w: 2 + Math.floor(Math.random() * 4),
-                    h: 2 + Math.floor(Math.random() * 3),
-                    c: Math.random() > 0.4 ? this.config.c3 : '#111111'
+                    w: 2 + Math.floor(Math.random() * 5),
+                    h: 2 + Math.floor(Math.random() * 4),
+                    c: spotPool[Math.floor(Math.random() * spotPool.length)]
                 });
             }
         }
@@ -314,7 +323,7 @@ class Fish {
         }
         else if (this.type === 'koi') {
             dot(-7, -3, 14, 6, config.outline);
-            dot(-6, -2, 12, 4, config.c1);
+            dot(-6, -2, 12, 4, this.baseColor);
             ctx.save();
             ctx.beginPath(); ctx.rect(Math.floor(-6*p), Math.floor(-2*p), Math.floor(12*p), Math.floor(4*p)); ctx.clip();
             this.spots.forEach(sp => dot(sp.x*10, sp.y*4, sp.w, sp.h, sp.c));
