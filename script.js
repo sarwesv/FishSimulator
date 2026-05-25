@@ -13,7 +13,7 @@ const FISH_TYPES = {
     goldfish: { color: '#ff9900', size: 6, speed: 0.5 },
     neon: { color: '#00ffff', size: 4, speed: 0.8 },
     betta: { color: '#ff0055', size: 8, speed: 0.3 },
-    koi: { color: '#ffffff', size: 9, speed: 0.4 }
+    koi: { color: '#f5f5dc', size: 9, speed: 0.4 } // Cream color body
 };
 
 // --- Game State ---
@@ -34,10 +34,10 @@ class Bubble {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 0.2;
-        this.vy = -Math.random() * 0.3 - 0.1;
-        this.size = Math.random() * 1 + 0.5;
-        this.life = 60;
+        this.vx = (Math.random() - 0.5) * 0.1;
+        this.vy = -Math.random() * 0.2 - 0.1;
+        this.size = Math.random() * 0.8 + 0.4;
+        this.life = 80;
     }
 
     update() {
@@ -47,7 +47,7 @@ class Bubble {
     }
 
     draw() {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillStyle = 'rgba(150, 200, 255, 0.15)'; // Very subtle blue
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -141,7 +141,7 @@ class Fish {
         });
 
         this.bubbleTimer++;
-        if (this.bubbleTimer > 150 + Math.random() * 250) {
+        if (this.bubbleTimer > 200 + Math.random() * 300) {
             bubbles.push(new Bubble(this.x + (this.flip ? -3 : 3), this.y));
             this.bubbleTimer = 0;
         }
@@ -154,8 +154,8 @@ class Fish {
         const size = this.config.size;
         ctx.fillStyle = this.config.color;
         
+        ctx.beginPath();
         if (this.type === 'betta') {
-            ctx.beginPath();
             ctx.ellipse(0, 0, size, size/2, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#aa0033';
@@ -165,7 +165,6 @@ class Fish {
             ctx.quadraticCurveTo(-size, size/2, -size/2, size/4);
             ctx.fill();
         } else if (this.type === 'koi') {
-            ctx.beginPath();
             ctx.ellipse(0, 0, size, size/3, 0, 0, Math.PI * 2);
             ctx.fill();
             this.pattern.forEach(p => {
@@ -175,7 +174,6 @@ class Fish {
                 ctx.fill();
             });
         } else {
-            ctx.beginPath();
             ctx.ellipse(0, 0, size, size/2, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
@@ -186,8 +184,9 @@ class Fish {
             ctx.fill();
         }
 
+        // Eye (Single pixel for ultra-retro)
         ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.arc(size/2, -0.5, 1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(size/2, -0.5, 1, 1);
         ctx.restore();
     }
 }
@@ -216,7 +215,9 @@ function draw() {
     if (gravelDebris > 0) {
         ctx.fillStyle = `rgba(50, 40, 0, ${gravelDebris/100})`;
         for(let i=0; i<gravelDebris; i++) {
-            ctx.fillRect(Math.sin(i) * CANVAS_WIDTH, CANVAS_HEIGHT - 8 + Math.cos(i)*2, 1.5, 1.5);
+            // Fix debris distribution logic
+            let dx = ((Math.sin(i * 13) + 1) / 2) * CANVAS_WIDTH;
+            ctx.fillRect(dx, CANVAS_HEIGHT - 8 + Math.cos(i * 7) * 2, 1.5, 1.5);
         }
     }
 
