@@ -233,8 +233,7 @@ class Fish {
 
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
-        else if (this.type === 'clownfish') {
-            // ... (rest of clownfish logic)
+        if (this.type === 'clownfish') {
             dot(-5, -3, 10, 6, config.outline);
             dot(-4, -2, 8, 4, config.c1);
             dot(-3, -3, 6, 6, config.c1);
