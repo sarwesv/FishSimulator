@@ -34,17 +34,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
-    goldfish: { c1: '#ff9900', c2: '#ffcc44', c3: '#cc5500', outline: '#331100', size: 14 },
-    angelfish: { c1: '#ffffff', c2: '#ffdd88', c3: '#444444', outline: '#1a1a1a', size: 14 },
-    koi: { c1: '#eeeeee', c2: '#ffffff', c3: '#ff4400', outline: '#222222', size: 16 },
-    neon: { c1: '#0066ff', c2: '#00ffff', c3: '#ff0044', outline: '#000033', size: 12 },
-    betta: { c1: '#cc0022', c2: '#ff3355', c3: '#660000', outline: '#220000', size: 15 },
-    guppy: { c1: '#00ffcc', c2: '#ff66ff', c3: '#008866', outline: '#002211', size: 12 },
-    pufferfish: { c1: '#ccaa88', c2: '#eeddcc', c3: '#886644', outline: '#443311', size: 12 },
-    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 12 },
-    cory: { c1: '#a08860', c2: '#504030', c3: '#706040', outline: '#332211', size: 12, habitat: 'bottom' },
-    shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#440000', size: 8, habitat: 'bottom' },
-    snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#221100', size: 10, habitat: 'bottom' }
+    goldfish: { c1: '#ff9900', c2: '#ffcc44', c3: '#cc5500', outline: '#331100', size: 14, speed: 0.5 },
+    angelfish: { c1: '#ffffff', c2: '#ffdd88', c3: '#444444', outline: '#1a1a1a', size: 14, speed: 0.4 },
+    koi: { c1: '#eeeeee', c2: '#ffffff', c3: '#ff4400', outline: '#222222', size: 16, speed: 0.35 },
+    neon: { c1: '#0066ff', c2: '#00ffff', c3: '#ff0044', outline: '#000033', size: 12, speed: 0.9 },
+    betta: { c1: '#cc0022', c2: '#ff3355', c3: '#660000', outline: '#220000', size: 15, speed: 0.25 },
+    guppy: { c1: '#00ffcc', c2: '#ff66ff', c3: '#008866', outline: '#002211', size: 12, speed: 0.7 },
+    pufferfish: { c1: '#ccaa88', c2: '#eeddcc', c3: '#886644', outline: '#443311', size: 12, speed: 0.3 },
+    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 12, speed: 0.6 },
+    cory: { c1: '#a08860', c2: '#504030', c3: '#706040', outline: '#332211', size: 12, speed: 0.3, habitat: 'bottom' },
+    shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#440000', size: 8, speed: 0.4, habitat: 'bottom' },
+    snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#221100', size: 10, speed: 0.1, habitat: 'bottom' }
 };
 
 const PLANT_TYPES = {
@@ -158,6 +158,11 @@ class Fish {
             }
         }
         this.vx *= FRICTION; this.vy *= FRICTION;
+        
+        // Final NaN Protection
+        if (isNaN(this.vx)) this.vx = 0;
+        if (isNaN(this.vy)) this.vy = 0;
+        
         this.x += this.vx; this.y += this.vy;
         
         if (this.config.habitat === 'bottom') {
