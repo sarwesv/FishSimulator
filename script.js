@@ -24,8 +24,13 @@ function resize() {
         GRAVEL_MAP[i] = CANVAS_HEIGHT - 15 + Math.sin(i * 0.05) * 4;
     }
 }
-// Call resize immediately
-resize();
+// Call resize on load and resize
+window.addEventListener('resize', resize);
+
+window.addEventListener('DOMContentLoaded', () => {
+    resize();
+    requestAnimationFrame(update);
+});
 
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
@@ -369,6 +374,3 @@ function resetGame() {
 window.addEventListener('resize', resize);
 window.addEventListener('touchstart', handleStart, { passive: false });
 window.addEventListener('click', handleStart);
-
-resize(); 
-requestAnimationFrame(update);
