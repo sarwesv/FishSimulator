@@ -24,6 +24,12 @@ let bubbles = [];
 let gravelDebris = 0;
 let selectedFishTypes = new Set();
 
+// Uneven Gravel Heightmap
+const GRAVEL_MAP = [];
+for (let i = 0; i <= CANVAS_WIDTH; i++) {
+    GRAVEL_MAP[i] = CANVAS_HEIGHT - 20 + Math.sin(i * 0.05) * 5 + Math.cos(i * 0.1) * 3;
+}
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -33,7 +39,7 @@ ctx.imageSmoothingEnabled = false;
 class Plant {
     constructor(x) {
         this.x = x;
-        this.y = CANVAS_HEIGHT - 12;
+        this.y = GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 12;
         this.height = 30 + Math.random() * 50;
         this.width = 8 + Math.random() * 8;
         this.segments = Math.floor(this.height / 10);
@@ -83,8 +89,9 @@ class Food {
     update() {
         if (!this.settled) {
             this.y += this.vy;
-            if (this.y >= CANVAS_HEIGHT - 16) {
-                this.y = CANVAS_HEIGHT - 16; this.settled = true;
+            const floorY = GRAVEL_MAP[Math.floor(this.x)] || CANVAS_HEIGHT - 16;
+            if (this.y >= floorY - 4) {
+                this.y = floorY - 4; this.settled = true;
                 gravelDebris = Math.min(100, gravelDebris + 2);
             }
         } else { this.life--; }
@@ -258,15 +265,22 @@ function draw() {
     ctx.fillStyle = `rgb(0, ${green}, ${blue})`;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
-    // Gravel
+    // Gravel - Uneven
     ctx.fillStyle = '#887766';
-    ctx.fillRect(0, CANVAS_HEIGHT - 24, CANVAS_WIDTH, 24);
+    ctx.beginPath();
+    ctx.moveTo(0, CANVAS_HEIGHT);
+    for (let i = 0; i <= CANVAS_WIDTH; i++) {
+        ctx.lineTo(i, GRAVEL_MAP[i]);
+    }
+    ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fill();
     
     if (gravelDebris > 0) {
         ctx.fillStyle = `rgba(50, 40, 0, ${gravelDebris/100})`;
         for(let i=0; i<gravelDebris; i++) {
-            let dx = ((Math.sin(i * 13) + 1) / 2) * CANVAS_WIDTH;
-            ctx.fillRect(dx, CANVAS_HEIGHT - 30 + Math.cos(i * 7) * 8, 6, 6);
+            let dx = Math.floor(((Math.sin(i * 13) + 1) / 2) * CANVAS_WIDTH);
+            let dy = GRAVEL_MAP[dx] + Math.cos(i * 7) * 4;
+            ctx.fillRect(dx, dy, 6, 6);
         }
     }
 
