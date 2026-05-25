@@ -35,7 +35,7 @@ The project is organized into three core files for clean separation of concerns:
 - `style.css`: Handles the visual design, retro typography, and responsive scaling.
 - `script.js`: Contains the simulation engine, autonomous AI, and physics logic.
 
-## 🚀 Getting Started
+## 🚀 Getting Started (run on web at https://sarwesv.github.io/FishSimulator/)
 
 1. **Clone the repository:**
    ```bash
