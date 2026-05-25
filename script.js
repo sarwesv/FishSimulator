@@ -189,53 +189,122 @@ class Fish {
         const s = this.config.size;
         const speedFactor = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 2;
         const tailWobble = Math.sin(this.animTimer) * (2 + speedFactor);
+        const finWobble = Math.sin(this.animTimer * 1.5) * 2;
         
         ctx.fillStyle = this.config.color;
 
         if (this.type === 'goldfish') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.6, 0, 0, Math.PI*2); ctx.fill();
+            // Dorsal Fin
             ctx.beginPath();
-            ctx.moveTo(-s+4, 0);
-            ctx.quadraticCurveTo(-s-8, -s*0.8 + tailWobble, -s-12, -s*0.4);
-            ctx.lineTo(-s-12, s*0.4);
-            ctx.quadraticCurveTo(-s-8, s*0.8 - tailWobble, -s+4, 0);
+            ctx.moveTo(-s*0.4, -s*0.4);
+            ctx.quadraticCurveTo(-s*0.6, -s*0.9, -s, -s*0.4);
             ctx.fill();
-            ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.5); ctx.lineTo(-s*0.6, -s*0.8); ctx.lineTo(-s, -s*0.4); ctx.fill();
+
+            // Pectoral Fin
+            ctx.beginPath();
+            ctx.moveTo(s*0.2, s*0.2);
+            ctx.quadraticCurveTo(s*0.4, s*0.5 + finWobble, 0, s*0.6);
+            ctx.fill();
+
+            // Body
+            ctx.beginPath(); 
+            ctx.ellipse(0, 0, s, s*0.65, 0, 0, Math.PI*2); 
+            ctx.fill();
+
+            // Tail (Flowing fan tail)
+            ctx.beginPath();
+            ctx.moveTo(-s+2, 0);
+            ctx.bezierCurveTo(-s-10, -s*1.2 + tailWobble, -s-20, -s*0.5, -s-15, 0);
+            ctx.bezierCurveTo(-s-20, s*0.5, -s-10, s*1.2 - tailWobble, -s+2, 0);
+            ctx.fill();
+            
+            // Highlight
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.2, s*0.4, s*0.2, 0.2, 0, Math.PI*2); ctx.fill();
         } 
         else if (this.type === 'neon') {
+            // Body
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Neon Glow Stripe
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = '#00ffff';
             ctx.fillStyle = '#00ffff';
-            ctx.fillRect(-s*0.5, -2, s, 3);
+            ctx.fillRect(-s*0.6, -2, s*1.2, 2);
+            ctx.shadowBlur = 0;
+
+            // Red Stripe
             ctx.fillStyle = '#ff3333';
-            ctx.beginPath(); ctx.moveTo(-s+2, 0); ctx.lineTo(-s-6, -s*0.4 + tailWobble/2); ctx.lineTo(-s-6, s*0.4 - tailWobble/2); ctx.fill();
+            ctx.fillRect(-s*0.2, 1, s*0.8, 2);
+
+            // Tail
+            ctx.beginPath(); 
+            ctx.moveTo(-s+2, 0); 
+            ctx.lineTo(-s-8, -s*0.5 + tailWobble/2); 
+            ctx.lineTo(-s-8, s*0.5 - tailWobble/2); 
+            ctx.fill();
+
+            // Small Fins
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath(); ctx.moveTo(0, -s*0.3); ctx.lineTo(-s*0.3, -s*0.5); ctx.lineTo(-s*0.5, -s*0.3); ctx.fill();
         }
         else if (this.type === 'betta') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s*0.7, s*0.3, 0, 0, Math.PI*2); ctx.fill();
+            // Body
+            ctx.beginPath(); ctx.ellipse(0, 0, s*0.8, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Elaborate Fins (flowing)
             ctx.fillStyle = '#990011';
+            
+            // Tail
             ctx.beginPath();
             ctx.moveTo(-s*0.5, 0);
-            ctx.bezierCurveTo(-s*1.5, -s*1.2 + tailWobble, -s*2.5, -s*0.5, -s*2.5, 0);
-            ctx.bezierCurveTo(-s*2.5, s*0.5, -s*1.5, s*1.2 - tailWobble, -s*0.5, 0);
+            ctx.bezierCurveTo(-s*1.5, -s*1.8 + tailWobble, -s*3.5, -s*1.0, -s*3.2, 0);
+            ctx.bezierCurveTo(-s*3.5, s*1.0, -s*1.5, s*1.8 - tailWobble, -s*0.5, 0);
             ctx.fill();
-            ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.quadraticCurveTo(-s*0.5, -s*1.2, -s, -s*0.5); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.quadraticCurveTo(-s*0.5, s*1.2, -s, s*0.5); ctx.fill();
+            
+            // Dorsal
+            ctx.beginPath(); 
+            ctx.moveTo(s*0.1, -s*0.2); 
+            ctx.bezierCurveTo(-s*0.5, -s*1.5, -s*1.5, -s*1.2, -s*1.2, -s*0.3); 
+            ctx.fill();
+            
+            // Ventral
+            ctx.beginPath(); 
+            ctx.moveTo(s*0.1, s*0.2); 
+            ctx.bezierCurveTo(-s*0.5, s*1.5, -s*1.5, s*1.2, -s*1.2, s*0.3); 
+            ctx.fill();
         }
         else if (this.type === 'koi') {
-            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            // Body
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.4, 0, 0, Math.PI*2); ctx.fill();
+            
+            // Patterns
             this.pattern.forEach(p => {
                 ctx.fillStyle = p.c;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
             });
+            
+            // Fins
             ctx.fillStyle = this.config.color;
-            ctx.beginPath(); ctx.moveTo(-s+4, 0); ctx.lineTo(-s-8, -s*0.5 + tailWobble); ctx.lineTo(-s-8, s*0.5 - tailWobble); ctx.fill();
-            ctx.strokeStyle = this.config.color;
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(s-2, 2); ctx.lineTo(s+4, 6); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(s-2, -2); ctx.lineTo(s+4, -6); ctx.stroke();
+            // Pectoral fins (pair)
+            ctx.beginPath(); ctx.ellipse(s*0.2, s*0.3, s*0.3, s*0.15, 0.5 + finWobble*0.1, 0, Math.PI*2); ctx.fill();
+            
+            // Tail
+            ctx.beginPath(); ctx.moveTo(-s+4, 0); ctx.lineTo(-s-10, -s*0.6 + tailWobble); ctx.lineTo(-s-10, s*0.6 - tailWobble); ctx.fill();
+            
+            // Barbels (Whiskers)
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(s-2, 2); ctx.quadraticCurveTo(s+6, 8, s+4, 12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s-2, -2); ctx.quadraticCurveTo(s+6, -8, s+4, -12); ctx.stroke();
         }
 
+        // Eye
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(s*0.6, -s*0.1, 2.5, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#000';
-        ctx.fillRect(s*0.5, -2, 2, 2);
+        ctx.beginPath(); ctx.arc(s*0.7, -s*0.1, 1.2, 0, Math.PI*2); ctx.fill();
+        
         ctx.restore();
     }
 }
