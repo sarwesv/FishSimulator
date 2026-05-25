@@ -116,15 +116,15 @@ h1 {
 /* Game UI Controls */
 #game-ui {
     position: absolute;
-    bottom: 30px;
+    bottom: 15px;
     left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 8px;
     z-index: 150;
     flex-wrap: wrap;
-    padding: 10px;
+    padding: 5px;
     pointer-events: none; /* Let clicks through to buttons */
 }
 
