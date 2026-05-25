@@ -335,13 +335,21 @@ function handleStart(e) {
     else if (t.id === 'feed-btn') foods.push(new Food(40 + Math.random() * (CANVAS_WIDTH - 80), 0));
     else if (t.id === 'clean-btn') { gravelDebris = 0; foods = foods.filter(f => !f.settled); }
     else if (t.id === 'add-fish-btn') document.getElementById('add-fish-overlay').classList.remove('hidden');
-    else if (t.id === 'add-plant-btn') plants.push(new Plant(Math.random() * CANVAS_WIDTH));
+    else if (t.id === 'add-plant-btn') document.getElementById('add-plant-overlay').classList.remove('hidden');
     else if (t.id === 'reset-btn') resetGame();
+    
+    // Overlays
     else if (t.classList.contains('add-fish-option')) {
         fishes.push(new Fish(t.getAttribute('data-fish')));
         document.getElementById('add-fish-overlay').classList.add('hidden');
     } 
     else if (t.id === 'close-add-fish') document.getElementById('add-fish-overlay').classList.add('hidden');
+    
+    else if (t.classList.contains('add-plant-option')) {
+        plants.push(new Plant(t.getAttribute('data-plant'), 20 + Math.random() * (CANVAS_WIDTH - 40)));
+        document.getElementById('add-plant-overlay').classList.add('hidden');
+    }
+    else if (t.id === 'close-add-plant') document.getElementById('add-plant-overlay').classList.add('hidden');
 
     if (e.cancelable && t.tagName === 'BUTTON') e.preventDefault();
 }
