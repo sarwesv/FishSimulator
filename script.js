@@ -81,11 +81,35 @@ class Fish {
         this.idleTimer = 0;
         this.boost = 1.0;
         
+        // --- Unique Pattern Generation ---
+        this.uniqueColor = this.config.color;
+        this.uniquePattern = this.config.pattern;
+        
+        // Randomize base colors slightly
+        if (Math.random() < 0.3) {
+            const colors = ['#ff8800', '#ffaa00', '#ff4400', '#ee6600'];
+            if (this.type === 'goldfish') this.uniqueColor = colors[Math.floor(Math.random() * colors.length)];
+            if (this.type === 'betta') this.uniqueColor = ['#cc0022', '#aa00ff', '#2200cc', '#00aa22'][Math.floor(Math.random() * 4)];
+        }
+
         if (type === 'koi') {
             this.blotches = [];
-            for(let i=0; i<4; i++) {
-                this.blotches.push({ x: (Math.random()-0.5)*0.8, y: (Math.random()-0.5)*0.3, w: 0.3, h: 0.2 });
+            const blotchCount = 3 + Math.floor(Math.random() * 5);
+            const blotchColors = ['#ff4400', '#222222', '#ff8800', '#cc0000'];
+            const mainBlotchColor = blotchColors[Math.floor(Math.random() * blotchColors.length)];
+            
+            for(let i=0; i<blotchCount; i++) {
+                this.blotches.push({ 
+                    x: (Math.random()-0.5)*1.2, 
+                    y: (Math.random()-0.5)*0.4, 
+                    w: 0.1 + Math.random()*0.4, 
+                    h: 0.1 + Math.random()*0.3,
+                    c: Math.random() > 0.3 ? mainBlotchColor : blotchColors[Math.floor(Math.random() * blotchColors.length)]
+                });
             }
+        } else if (type === 'betta' || type === 'goldfish') {
+            // Randomize fin patterns
+            this.finPattern = Math.random() > 0.5 ? 'solid' : 'striped';
         }
     }
 
@@ -136,16 +160,18 @@ class Fish {
         if (this.flip) ctx.scale(-1, 1);
 
         // --- BLOCKY PIXEL ART STYLE ---
-        ctx.fillStyle = this.config.color;
+        ctx.fillStyle = this.uniqueColor;
 
         if (this.type === 'koi') {
             // Main Body (Blocky Torpedo)
             ctx.fillRect(-s*0.8, -s*0.3, s*1.6, s*0.6);
             // Blotches
-            ctx.fillStyle = this.config.pattern;
-            this.blotches.forEach(b => ctx.fillRect(b.x*s, b.y*s, b.w*s, b.h*s));
+            this.blotches.forEach(b => {
+                ctx.fillStyle = b.c;
+                ctx.fillRect(b.x*s, b.y*s, b.w*s, b.h*s);
+            });
             // Tail
-            ctx.fillStyle = this.config.color;
+            ctx.fillStyle = this.uniqueColor;
             ctx.fillRect(-s*1.2, -s*0.4 + tailSway, s*0.4, s*0.8);
             // Fins
             ctx.fillRect(s*0.2, s*0.3, s*0.4, s*0.2);
@@ -154,15 +180,22 @@ class Fish {
             // Body (Chunky)
             ctx.fillRect(-s*0.6, -s*0.5, s*1.2, s*1.0);
             // Tail (Large Block)
-            ctx.fillStyle = this.config.pattern;
-            ctx.fillRect(-s*1.2, -s*0.6 + tailSway, s*0.6, s*1.2);
+            ctx.fillStyle = this.uniquePattern;
+            if (this.finPattern === 'striped') {
+                ctx.fillRect(-s*1.2, -s*0.6 + tailSway, s*0.6, s*1.2);
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(-s*1.2, -s*0.2 + tailSway, s*0.6, 2);
+            } else {
+                ctx.fillRect(-s*1.2, -s*0.6 + tailSway, s*0.6, s*1.2);
+            }
             // Dorsal Fin
+            ctx.fillStyle = this.uniqueColor;
             ctx.fillRect(-s*0.2, -s*0.8, s*0.4, s*0.3);
         } else if (this.type === 'betta') {
             // Slender Body
             ctx.fillRect(-s*0.6, -s*0.2, s*1.2, s*0.4);
             // Massive Blocky Fins
-            ctx.fillStyle = this.config.pattern;
+            ctx.fillStyle = this.uniquePattern;
             ctx.fillRect(-s*0.4, -s*1.0 + tailSway/2, s*0.8, s*0.8); // Top
             ctx.fillRect(-s*0.4, s*0.2 - tailSway/2, s*0.8, s*0.8);  // Bottom
             ctx.fillRect(-s*1.4, -s*0.6 + tailSway, s*0.8, s*1.2);   // Tail
@@ -170,7 +203,7 @@ class Fish {
             // Sleek Body
             ctx.fillRect(-s*0.8, -s*0.2, s*1.6, s*0.4);
             // Glowing Stripe
-            ctx.fillStyle = this.config.pattern;
+            ctx.fillStyle = this.uniquePattern;
             ctx.fillRect(-s*0.8, -s*0.05, s*1.4, s*0.1);
             // Red Tail
             ctx.fillStyle = '#ff2222';
