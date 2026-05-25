@@ -4,7 +4,6 @@
  */
 
 // --- Constants & Config ---
-// High resolution for smoother fish while maintaining pixelated style
 const CANVAS_WIDTH = 480; 
 const CANVAS_HEIGHT = 300;
 const FRICTION = 0.98;
@@ -18,16 +17,44 @@ const FISH_TYPES = {
 
 // --- Game State ---
 let state = 'MENU';
-let fish = null;
+let fishes = [];
+let plants = [];
 let foods = [];
 let bubbles = [];
 let gravelDebris = 0;
+let selectedFishTypes = new Set();
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 // --- Entities ---
+
+class Plant {
+    constructor(x) {
+        this.x = x;
+        this.y = CANVAS_HEIGHT - 12;
+        this.height = 30 + Math.random() * 50;
+        this.width = 8 + Math.random() * 8;
+        this.segments = Math.floor(this.height / 10);
+        this.offset = Math.random() * Math.PI * 2;
+        this.color = Math.random() > 0.5 ? '#228822' : '#22aa44';
+    }
+
+    draw() {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.width;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        
+        for (let i = 1; i <= this.segments; i++) {
+            let sway = Math.sin(Date.now() * 0.002 + this.offset + i * 0.5) * (i * 3);
+            ctx.lineTo(this.x + sway, this.y - (i * (this.height / this.segments)));
+        }
+        ctx.stroke();
+    }
+}
 
 class Bubble {
     constructor(x, y, isBig = false) {
@@ -216,7 +243,7 @@ class Fish {
 
 function update() {
     if (state === 'PLAYING') {
-        fish.update();
+        fishes.forEach(f => f.update());
         foods.forEach((f, i) => { f.update(); if (f.life <= 0) foods.splice(i, 1); });
         bubbles.forEach((b, i) => { b.update(); if (b.life <= 0) bubbles.splice(i, 1); });
     }
@@ -244,30 +271,69 @@ function draw() {
     }
 
     if (state === 'PLAYING') {
+        plants.forEach(p => p.draw());
         bubbles.forEach(b => b.draw());
         foods.forEach(f => f.draw());
-        fish.draw();
+        fishes.forEach(f => f.draw());
     }
 }
 
 // --- Input Handling ---
 
 function handleStart(e) {
-    if (e.target.classList.contains('menu-btn')) {
-        startGame(e.target.getAttribute('data-fish'));
-    } else if (e.target.id === 'feed-btn') {
+    const target = e.target;
+    
+    // Initial Selection
+    if (target.classList.contains('selection-btn')) {
+        const type = target.getAttribute('data-fish');
+        if (selectedFishTypes.has(type)) {
+            selectedFishTypes.delete(type);
+            target.classList.remove('selected');
+        } else {
+            selectedFishTypes.add(type);
+            target.classList.add('selected');
+        }
+        
+        const startBtn = document.getElementById('start-btn');
+        if (selectedFishTypes.size > 0) {
+            startBtn.classList.remove('hidden');
+        } else {
+            startBtn.classList.add('hidden');
+        }
+    } 
+    else if (target.id === 'start-btn') {
+        startGame();
+    }
+    
+    // Mid-game UI
+    else if (target.id === 'feed-btn') {
         foods.push(new Food(40 + Math.random() * (CANVAS_WIDTH - 80), 0));
-    } else if (e.target.id === 'clean-btn') {
+    } else if (target.id === 'clean-btn') {
         gravelDebris = 0;
         foods = foods.filter(f => !f.settled);
-    } else if (e.target.id === 'reset-btn') {
+    } else if (target.id === 'add-fish-btn') {
+        document.getElementById('add-fish-overlay').classList.remove('hidden');
+    } else if (target.id === 'add-plant-btn') {
+        plants.push(new Plant(Math.random() * CANVAS_WIDTH));
+    } else if (target.id === 'reset-btn') {
         resetGame();
     }
-    if (e.cancelable) e.preventDefault();
+    
+    // Add Fish Overlay
+    else if (target.classList.contains('add-fish-option')) {
+        fishes.push(new Fish(target.getAttribute('data-fish')));
+        document.getElementById('add-fish-overlay').classList.add('hidden');
+    } else if (target.id === 'close-add-fish') {
+        document.getElementById('add-fish-overlay').classList.add('hidden');
+    }
+
+    if (e.cancelable && target.tagName === 'BUTTON') e.preventDefault();
 }
 
-function startGame(type) {
-    fish = new Fish(type);
+function startGame() {
+    selectedFishTypes.forEach(type => {
+        fishes.push(new Fish(type));
+    });
     state = 'PLAYING';
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('game-ui').classList.remove('hidden');
@@ -275,9 +341,15 @@ function startGame(type) {
 
 function resetGame() {
     state = 'MENU';
-    fish = null; foods = []; bubbles = []; gravelDebris = 0;
+    fishes = []; plants = []; foods = []; bubbles = []; gravelDebris = 0;
+    selectedFishTypes.clear();
+    
+    // Reset UI
+    document.querySelectorAll('.selection-btn').forEach(btn => btn.classList.remove('selected'));
+    document.getElementById('start-btn').classList.add('hidden');
     document.getElementById('menu-overlay').classList.remove('hidden');
     document.getElementById('game-ui').classList.add('hidden');
+    document.getElementById('add-fish-overlay').classList.add('hidden');
 }
 
 window.addEventListener('touchstart', handleStart, { passive: false });
