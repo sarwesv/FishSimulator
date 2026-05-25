@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fish Simulator</title>
+    <!-- Import Google Sans-Serif Pixel Font VT323 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="200" height="125"></canvas>
+        
+        <!-- Selection Screen -->
+        <div id="menu-overlay" class="overlay">
+            <h1>SELECT YOUR FISH</h1>
+            <div class="fish-options">
+                <button class="menu-btn" data-fish="goldfish">GOLDFISH</button>
+                <button class="menu-btn" data-fish="neon">NEON TETRA</button>
+                <button class="menu-btn" data-fish="betta">BETTA</button>
+                <button class="menu-btn" data-fish="koi">KOI</button>
+            </div>
+        </div>
+
+        <!-- Game UI -->
+        <div id="game-ui" class="hidden">
+            <button id="feed-btn" class="ui-btn">FEED</button>
+            <button id="clean-btn" class="ui-btn">CLEAN</button>
+            <button id="reset-btn" class="ui-btn">RESET</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
