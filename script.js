@@ -109,6 +109,7 @@ class Fish {
         this.flip = false;
         this.animTimer = Math.random() * 10;
         this.idleTimer = 0;
+        this.mouthTimer = 0;
         
         if (type === 'koi') {
             this.spots = [];
@@ -118,6 +119,7 @@ class Fish {
 
     update() {
         this.animTimer += 0.15;
+        if (this.mouthTimer > 0) this.mouthTimer--;
 
         // Boundary Safety Check (use latest dimensions)
         if (this.x < -20 || this.x > CANVAS_WIDTH + 20 || this.y < -20 || this.y > CANVAS_HEIGHT + 20) {
@@ -158,7 +160,10 @@ class Fish {
         if (this.vx < -0.05) this.flip = true;
 
         foods.forEach((f, i) => {
-            if (Math.abs(f.x - this.x) < 8 && Math.abs(f.y - this.y) < 4) foods.splice(i, 1);
+            if (Math.abs(f.x - this.x) < this.config.size/2 && Math.abs(f.y - this.y) < this.config.size/4) {
+                foods.splice(i, 1);
+                this.mouthTimer = 30;
+            }
         });
     }
 
@@ -167,13 +172,14 @@ class Fish {
         ctx.translate(Math.floor(this.x), Math.floor(this.y));
         if (this.flip) ctx.scale(-1, 1);
 
+        const config = this.config;
+        const p = config.size / 8; // Scale factor
+        const sway = Math.floor(Math.sin(this.animTimer * 1.5) * 1) * p;
+
         const dot = (x, y, w, h, c) => {
             ctx.fillStyle = c;
-            ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
+            ctx.fillRect(Math.floor(x * p), Math.floor(y * p), Math.floor(w * p), Math.floor(h * p));
         };
-
-        const config = this.config;
-        const sway = Math.floor(Math.sin(this.animTimer * 1.5) * 1);
 
         // --- SPRITE RENDERING WITH CLIPPING PROTECTION ---
         
