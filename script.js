@@ -168,7 +168,16 @@ class Fish {
             dot(-7, -2, 14, 4, c);
             dot(-8, -1, 16, 2, c);
             dot(-6, -3, 12, 6, c);
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(Math.floor(-7 * p), Math.floor(-2 * p), Math.floor(14 * p), Math.floor(4 * p));
+            ctx.rect(Math.floor(-8 * p), Math.floor(-1 * p), Math.floor(16 * p), Math.floor(2 * p));
+            ctx.rect(Math.floor(-6 * p), Math.floor(-3 * p), Math.floor(12 * p), Math.floor(6 * p));
+            ctx.clip();
             this.spots.forEach(sp => dot(sp.x*8, sp.y*8, 3, 3, pt));
+            ctx.restore();
+
             // Tail
             dot(-11, -3 + sway/p, 3, 6, c);
         }
