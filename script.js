@@ -282,7 +282,7 @@ class Fish {
 
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
-        else if (this.type === 'yellowtang') {
+        if (this.type === 'yellowtang') {
             // Chunky body with thick outlines (Matching Reference)
             dot(-4, -4, 9, 9, config.outline);
             dot(-3, -3, 7, 7, config.c1);
