@@ -166,22 +166,10 @@ class Fish {
         this.x += this.vx; this.y += this.vy;
         if (this.vx > 0.1) this.flip = false;
         if (this.vx < -0.1) this.flip = true;
-
-        foods.forEach((f, i) => {
-            if (Math.abs(f.x - this.x) < this.config.size && Math.abs(f.y - this.y) < this.config.size/2) foods.splice(i, 1);
-        });
-
-        this.bubbleTimer--;
-        if (this.bubbleTimer <= 0) {
-            // Blow a burst of 2-4 bubbles
-            const count = 2 + Math.floor(Math.random() * 3);
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    bubbles.push(new Bubble(
-                        this.x + (this.flip ? -this.config.size * 0.7 : this.config.size * 0.7),
-                        this.y - (this.config.size * 0.1), 
-                        Math.random() > 0.9
-                    ));
+foods.forEach((f, i) => {
+    if (Math.abs(f.x - this.x) < this.config.size && Math.abs(f.y - this.y) < this.config.size/2) foods.splice(i, 1);
+});
+}
                 }, i * 150); // Stagger the bubbles
             }
             this.bubbleTimer = 150 + Math.random() * 500;
