@@ -34,19 +34,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
-    goldfish: { c1: '#ff7700', c2: '#ffffff', c3: '#ffaa33', outline: '#441100', size: 16, speed: 0.45 },
-    angelfish: { c1: '#c0c0c0', c2: '#ffff88', c3: '#111111', outline: '#000000', size: 18, speed: 0.35 },
-    koi: { c1: '#ffffff', c2: '#ffcc00', c3: '#cc0000', outline: '#222222', size: 20, speed: 0.3 },
-    neon: { c1: '#00ccff', c2: '#ffffff', c3: '#ff0000', outline: '#000044', size: 12, speed: 0.9 },
-    betta: { c1: '#440066', c2: '#ff0044', c3: '#220033', outline: '#110011', size: 16, speed: 0.2 },
-    guppy: { c1: '#888888', c2: '#00ffcc', c3: '#ff66ff', outline: '#222222', size: 14, speed: 0.6 },
-    pufferfish: { c1: '#ccaa77', c2: '#eeddcc', c3: '#553311', outline: '#332211', size: 15, speed: 0.25 },
-    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 14, speed: 0.55 },
-    platy: { c1: '#ff4400', c2: '#ffcc00', c3: '#000000', outline: '#331100', size: 14, speed: 0.5 },
-    coralshrimp: { c1: '#ffffff', c2: '#ff0000', c3: '#ffffff', outline: '#220000', size: 12, speed: 0.35, habitat: 'bottom' },
-    cory: { c1: '#887766', c2: '#554433', c3: '#332211', outline: '#110000', size: 15, speed: 0.3, habitat: 'bottom' },
-    shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#440000', size: 10, speed: 0.4, habitat: 'bottom' },
-    snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#221100', size: 12, speed: 0.1, habitat: 'bottom' }
+    goldfish: { c1: '#ff9500', c2: '#ffffff', c3: '#cc4400', outline: '#000000', size: 16, speed: 0.45 },
+    angelfish: { c1: '#e0e0e0', c2: '#ffff00', c3: '#111111', outline: '#000000', size: 18, speed: 0.35 },
+    koi: { c1: '#ffffff', c2: '#ffcc00', c3: '#cc0000', outline: '#000000', size: 20, speed: 0.3 },
+    neon: { c1: '#00ccff', c2: '#ffffff', c3: '#ff0000', outline: '#000000', size: 12, speed: 0.9 },
+    betta: { c1: '#660088', c2: '#ff0044', c3: '#220033', outline: '#000000', size: 16, speed: 0.2 },
+    guppy: { c1: '#999999', c2: '#00ffcc', c3: '#ff66ff', outline: '#000000', size: 14, speed: 0.6 },
+    pufferfish: { c1: '#ccaa77', c2: '#eeddcc', c3: '#553311', outline: '#000000', size: 15, speed: 0.25 },
+    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#000000', size: 14, speed: 0.55 },
+    platy: { c1: '#ff4400', c2: '#ffcc00', c3: '#000000', outline: '#000000', size: 14, speed: 0.5 },
+    coralshrimp: { c1: '#ffffff', c2: '#ff0000', c3: '#ffffff', outline: '#000000', size: 12, speed: 0.35, habitat: 'bottom' },
+    yellowtang: { c1: '#ffff00', c2: '#ffffff', c3: '#44aaff', outline: '#000000', size: 16, speed: 0.5 },
+    cory: { c1: '#887766', c2: '#554433', c3: '#332211', outline: '#000000', size: 15, speed: 0.3, habitat: 'bottom' },
+    shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#000000', size: 10, speed: 0.4, habitat: 'bottom' },
+    snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#000000', size: 12, speed: 0.1, habitat: 'bottom' }
 };
 
 const PLANT_TYPES = {
@@ -233,163 +234,111 @@ class Fish {
 
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
-        if (this.type === 'clownfish') {
-            dot(-5, -3, 10, 6, config.outline);
-            dot(-4, -2, 8, 4, config.c1);
+        if (this.type === 'yellowtang') {
+            // Chunky body with thick outlines (Matching Reference)
+            dot(-4, -4, 8, 8, config.outline);
             dot(-3, -3, 6, 6, config.c1);
-            dot(-3, -3, 2, 6, config.outline); dot(-3, -2, 2, 4, config.c2); // Front
-            dot(0, -3, 2, 6, config.outline); dot(0, -2, 2, 4, config.c2);   // Middle
-            dot(3, -2, 1, 4, config.outline); dot(3, -1, 1, 2, config.c2);   // Back
-            dot(-6, -2 + sway/p, 3, 4, config.outline);
-            dot(-6, -1 + sway/p, 2, 2, config.c1);
-            dot(3, -1, 2, 2, config.outline); dot(3, -1, 1, 1, '#000');
-        }
-        else if (this.type === 'platy') {
-            // Deep, rounded body
-            dot(-4, -3, 8, 7, config.outline);
-            dot(-3, -2, 6, 5, config.c1);
-            dot(-2, -3, 4, 1, config.c1);
-            // Wagtail pattern (black fins/tail)
-            dot(-7, -3 + sway/p, 3, 6, config.c3); // Tail
-            dot(-1, -5, 2, 2, config.c3); // Top fin
+            // Face region
+            dot(1, -2, 3, 3, config.c2); // White face
+            dot(0, -1, 1, 2, '#555');    // Grey detail
+            // Fins (Blue as in reference)
+            dot(-1, -5, 4, 1, config.c3); // Dorsal
+            dot(-1, 4, 4, 1, config.c3);  // Anal
+            dot(-7, -2 + sway/p, 3, 4, config.c3); // Tail
             // Eye
             dot(3, -1, 1, 1, '#000');
         }
-        else if (this.type === 'coralshrimp') {
-            // Banded body (red/white)
-            dot(-4, -1, 8, 3, config.outline);
-            dot(-4, 0, 2, 2, config.c2); // Red band
-            dot(-2, 0, 2, 2, config.c1); // White band
-            dot(0, 0, 2, 2, config.c2);  // Red band
-            dot(2, 0, 2, 2, config.c1);  // White band
-            // Massive white antennae
-            dot(3, -1, 6, 1, '#fff');
-            dot(3, -2, 5, 1, '#fff');
-            // Long banded claws
-            dot(1, 2, 4, 1, config.c2); dot(4, 3, 1, 2, config.c2); // Right claw
-            dot(-1, 2, 4, 1, config.c2); dot(-4, 3, 1, 2, config.c2); // Left claw
-        }
-        else if (this.type === 'pufferfish') {
-            // Boxy Body
-            dot(-5, -4, 10, 8, config.outline);
-            dot(-4, -3, 8, 6, config.c1);
-            dot(-4, 0, 8, 3, config.c2); // Pale belly
-            // Dark Spots
-            dot(-2, -2, 1, 1, config.c3); dot(0, -1, 1, 1, config.c3); dot(1, 1, 1, 1, config.c3); dot(-2, 1, 1, 1, config.c3);
-            // Flutter fins
-            dot(-1, -5, 2, 1, 'rgba(255,255,255,0.3)');
-            dot(-1, 4, 2, 1, 'rgba(255,255,255,0.3)');
-            // Tail
-            dot(-6, -1, 2, 2, config.outline);
-            // Eye
-            dot(2, -2, 3, 3, config.outline); dot(3, -2, 1, 1, '#000');
+        else if (this.type === 'clownfish') {
+            dot(-5, -3, 10, 6, config.outline);
+            dot(-4, -2, 8, 4, config.c1);
+            dot(-3, -3, 6, 6, config.c1);
+            // Distinct black-bordered white bands
+            dot(-3, -3, 2, 6, config.outline); dot(-2, -3, 1, 6, config.c2); 
+            dot(0, -3, 2, 6, config.outline); dot(1, -3, 1, 6, config.c2);
+            dot(3, -2, 1, 4, config.outline); dot(3, -1, 1, 2, config.c2);
+            // Tail & Fins
+            dot(-6, -2 + sway/p, 3, 4, config.outline);
+            dot(-6, -1 + sway/p, 2, 2, config.c1);
+            dot(3, -1, 1, 1, '#000');
         }
         else if (this.type === 'angelfish') {
-            // Diamond Silhouette
             dot(-2, -6, 4, 12, config.outline);
             dot(-4, -4, 8, 8, config.outline);
-            dot(-3, -3, 6, 6, config.c1);
             dot(-1, -5, 2, 10, config.c1);
-            // Black Stripes
-            dot(-1, -5, 1, 10, config.c3);
-            dot(1, -3, 1, 6, config.c3);
-            dot(3, -1, 1, 2, config.c3);
-            // Long stringy fins
-            dot(-1, -8, 1, 3, config.c2); dot(-1, 5, 1, 3, config.c2);
-            // Tail
-            dot(-5, -2 + sway/p, 2, 4, config.outline);
+            dot(-3, -3, 6, 6, config.c1);
+            // Thick Stripes
+            dot(-1, -5, 1, 10, config.outline);
+            dot(1, -3, 1, 6, config.outline);
             // Eye
-            dot(2, -2, 2, 2, config.outline);
+            dot(2, -1, 1, 1, '#000');
+        }
+        else if (this.type === 'platy') {
+            dot(-4, -3, 8, 7, config.outline);
+            dot(-3, -2, 6, 5, config.c1);
+            dot(-7, -3 + sway/p, 3, 6, config.outline);
+            dot(-7, -2 + sway/p, 2, 4, config.c3);
+            dot(3, -1, 1, 1, '#000');
+        }
+        else if (this.type === 'coralshrimp') {
+            dot(-4, -1, 8, 3, config.outline);
+            dot(-4, 0, 2, 2, config.c2); dot(-2, 0, 2, 2, config.c1); dot(0, 0, 2, 2, config.c2);
+            dot(3, -1, 6, 1, '#fff'); // Antennae
+            dot(1, 2, 4, 1, config.c2); dot(-1, 2, 4, 1, config.c2); // Claws
+        }
+        else if (this.type === 'pufferfish') {
+            dot(-5, -4, 10, 8, config.outline);
+            dot(-4, -3, 8, 6, config.c1);
+            dot(-2, -2, 1, 1, config.c3); dot(1, 1, 1, 1, config.c3);
+            dot(3, -2, 1, 1, '#000');
         }
         else if (this.type === 'neon') {
-            // Sleek Body
             dot(-6, -2, 12, 4, config.outline);
-            dot(-5, -1, 10, 2, config.c2); // Silver/White belly
-            // Blue Iridescent Line
-            dot(-5, -1, 10, 1, config.c1);
-            // Red Back Stripe
-            dot(-2, 0, 7, 1, config.c3);
-            // Tail
-            dot(-7, -2 + sway/p, 2, 4, config.c3);
-            // Eye
+            dot(-5, -1, 10, 2, config.c2);
+            dot(-5, -1, 10, 1, config.c1); // Blue
+            dot(-2, 0, 7, 1, config.c3);   // Red
             dot(4, -1, 1, 1, '#000');
         }
         else if (this.type === 'betta') {
-            // Slender Body
             dot(-4, -1, 8, 2, config.outline);
             dot(-3, -1, 6, 2, config.c1);
-            // Massive Drapery Fins
-            ctx.globalAlpha = 0.7;
-            dot(-3, -7 + sway/p, 6, 7, config.c2); // Dorsal
-            dot(-3, 1 - sway/p, 6, 8, config.c2);  // Anal
-            dot(-11, -5 + sway/p*2, 8, 11, config.c2); // Tail
-            ctx.globalAlpha = 1.0;
-            // Eye
-            dot(3, -1, 1, 1, '#fff');
+            dot(-3, -7 + sway/p, 6, 7, config.c2); 
+            dot(-3, 1 - sway/p, 6, 8, config.c2);
+            dot(-11, -5 + sway/p*2, 8, 11, config.c2);
         }
         else if (this.type === 'goldfish') {
-            // Egg Shape with Hump
             dot(-5, -4, 10, 8, config.outline);
             dot(-4, -3, 8, 6, config.c1);
-            dot(-2, -4, 4, 1, config.c1); // Hump
-            dot(-2, -3, 4, 1, config.c3); // Highlight
-            // Double Fantail
-            dot(-8, -5 + sway/p, 4, 10, config.c1);
+            dot(-8, -5 + sway/p, 4, 10, config.outline);
             dot(-7, -4 + sway/p, 3, 8, config.c3);
-            // Top fin
-            dot(-1, -5, 2, 2, config.c1);
-            // Eye
-            dot(3, -2, 2, 2, config.outline); dot(4, -2, 1, 1, '#000');
+            dot(3, -2, 1, 1, '#000');
         }
         else if (this.type === 'koi') {
-            // Thick Torpedo
             dot(-7, -3, 14, 6, config.outline);
             dot(-6, -2, 12, 4, config.c1);
-            // Randomized patterns
             ctx.save();
             ctx.beginPath(); ctx.rect(Math.floor(-6*p), Math.floor(-2*p), Math.floor(12*p), Math.floor(4*p)); ctx.clip();
             this.spots.forEach(sp => dot(sp.x*10, sp.y*4, sp.w, sp.h, sp.c));
             ctx.restore();
-            // Barbels (Whiskers)
-            dot(6, 1, 2, 1, '#888');
-            // Tail
-            dot(-9, -2 + sway/p, 3, 4, config.outline);
-            // Eye
             dot(5, -1, 1, 1, '#000');
         }
         else if (this.type === 'guppy') {
-            // Tiny Body
-            dot(-3, -1, 6, 2, config.c1);
-            // Massive Colorful Tail
-            dot(-10, -5 + sway/p, 8, 10, config.c2);
-            dot(-9, -4 + sway/p, 6, 8, config.c3);
-            // Eye
-            dot(3, -1, 1, 1, '#000');
+            dot(-3, -1, 6, 2, config.outline);
+            dot(-10, -5 + sway/p, 8, 10, config.outline);
+            dot(-9, -4 + sway/p, 6, 8, config.c2);
         }
         else if (this.type === 'cory') {
-            // Armored, Flat Belly
             dot(-5, -2, 10, 4, config.outline);
             dot(-4, -1, 8, 3, config.c1);
-            dot(-4, -2, 6, 1, config.c2); // Armored back
-            // Downward barbels
-            dot(3, 1, 1, 2, '#444');
-            // Tail
-            dot(-7, -1 + sway/p, 2, 3, config.outline);
+            dot(3, 1, 1, 2, config.outline); // Barbels
         }
         else if (this.type === 'shrimp') {
-            // Segmented/Arched
-            dot(-4, -2, 8, 4, 'rgba(255,255,255,0.1)'); // Transparent look
+            dot(-4, -2, 8, 4, config.outline);
             dot(-3, -1, 6, 2, config.c1);
-            // Antennae
-            dot(3, -2, 4, 1, '#fff');
-            // Legs
-            dot(-1, 2, 1, 2, '#fff'); dot(1, 2, 1, 2, '#fff');
+            dot(3, -2, 4, 1, '#fff'); // Antennae
         }
         else if (this.type === 'snail') {
-            // Shell
-            dot(-3, -4, 6, 6, config.c1);
-            dot(-2, -3, 4, 4, config.c3); // Spiral
-            // Foot
+            dot(-3, -4, 6, 6, config.outline);
+            dot(-2, -3, 4, 4, config.c1);
             dot(-5, 1, 10, 2, config.c2);
         }
 
