@@ -142,7 +142,12 @@ class Fish {
                 if (Math.random() < 0.05) { this.idleTimer = 40 + Math.random() * 80; }
                 else {
                     this.targetX = Math.max(20, Math.min(CANVAS_WIDTH - 20, this.x + (Math.random() - 0.5) * 100));
-                    this.targetY = this.config.habitat === 'bottom' ? GRAVEL_MAP[Math.floor(this.targetX)] - 4 : Math.max(20, Math.min(CANVAS_HEIGHT - 30, this.y + (Math.random() - 0.5) * 60));
+                    if (this.config.habitat === 'bottom') {
+                        const tx = Math.floor(this.targetX);
+                        this.targetY = (GRAVEL_MAP[tx] || (CANVAS_HEIGHT - 15)) - 4;
+                    } else {
+                        this.targetY = Math.max(20, Math.min(CANVAS_HEIGHT - 30, this.y + (Math.random() - 0.5) * 60));
+                    }
                 }
             }
             let dx = this.targetX - this.x; let dy = this.targetY - this.y;
@@ -156,7 +161,8 @@ class Fish {
         this.x += this.vx; this.y += this.vy;
         
         if (this.config.habitat === 'bottom') {
-            const floorY = GRAVEL_MAP[Math.floor(this.x)] || CANVAS_HEIGHT - 10;
+            const ix = Math.floor(this.x);
+            const floorY = (GRAVEL_MAP[ix] || (CANVAS_HEIGHT - 10));
             if (this.y < floorY - 8) this.vy += 0.1;
             if (this.y > floorY - 2) { this.y = floorY - 2; this.vy = 0; }
         }
