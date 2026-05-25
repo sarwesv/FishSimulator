@@ -204,7 +204,10 @@ class Fish {
             if (this.type === 'goldfish') {
                 dot(-3, -3, 6, 6, color);
                 dot(-4, -2, 8, 4, color);
-            } else if (this.type === 'koi' || this.type === 'neon') {
+            } else if (this.type === 'koi') {
+                dot(-6, -2, 12, 5, color);
+                dot(-5, -3, 10, 7, color);
+            } else if (this.type === 'neon') {
                 dot(-6, -1, 12, 2, color);
                 dot(-5, -2, 10, 4, color);
             } else if (this.type === 'betta') {
@@ -256,7 +259,10 @@ class Fish {
             if (this.type === 'goldfish') {
                 ctx.rect(Math.floor(-3 * p), Math.floor(-3 * p), Math.floor(6 * p), Math.floor(6 * p));
                 ctx.rect(Math.floor(-4 * p), Math.floor(-2 * p), Math.floor(8 * p), Math.floor(4 * p));
-            } else if (this.type === 'koi' || this.type === 'neon') {
+            } else if (this.type === 'koi') {
+                ctx.rect(Math.floor(-6 * p), Math.floor(-2 * p), Math.floor(12 * p), Math.floor(5 * p));
+                ctx.rect(Math.floor(-5 * p), Math.floor(-3 * p), Math.floor(10 * p), Math.floor(7 * p));
+            } else if (this.type === 'neon') {
                 ctx.rect(Math.floor(-6 * p), Math.floor(-1 * p), Math.floor(12 * p), Math.floor(2 * p));
                 ctx.rect(Math.floor(-5 * p), Math.floor(-2 * p), Math.floor(10 * p), Math.floor(4 * p));
             } else if (this.type === 'betta' || this.type === 'guppy') {
