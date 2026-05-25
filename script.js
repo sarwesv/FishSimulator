@@ -29,6 +29,7 @@ let plants = [];
 let foods = [];
 let bubbles = [];
 let gravelDebris = 0;
+let gravelColor = '#7a6b5c';
 let selectedFishTypes = new Set();
 
 const GRAVEL_MAP = [];
@@ -43,14 +44,17 @@ ctx.imageSmoothingEnabled = false;
 // --- Entities ---
 
 class Plant {
-    constructor(x) {
-        this.x = x;
-        this.y = GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 12;
-        this.height = 40 + Math.random() * 60;
-        this.width = 6 + Math.random() * 8;
-        this.segments = Math.floor(this.height / 12);
+    constructor(type, x) {
+        this.type = type || 'seaweed';
+        const config = PLANT_TYPES[this.type];
+        this.x = x || Math.random() * CANVAS_WIDTH;
+        this.y = GRAVEL_MAP[Math.floor(this.x)] || CANVAS_HEIGHT - 12;
+        this.height = config.height * (0.8 + Math.random() * 0.4);
+        this.width = config.width * (0.8 + Math.random() * 0.4);
+        this.segments = config.segments;
+        this.swayAmount = config.sway;
         this.offset = Math.random() * Math.PI * 2;
-        this.color = Math.random() > 0.5 ? '#1e6b1e' : '#228a44';
+        this.color = config.color;
     }
     draw() {
         ctx.strokeStyle = this.color;
@@ -59,7 +63,7 @@ class Plant {
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         for (let i = 1; i <= this.segments; i++) {
-            let sway = Math.sin(Date.now() * 0.0015 + this.offset + i * 0.4) * (i * 5);
+            let sway = Math.sin(Date.now() * 0.0015 + this.offset + i * 0.4) * (i * this.swayAmount);
             ctx.lineTo(this.x + sway, this.y - (i * (this.height / this.segments)));
         }
         ctx.stroke();
@@ -299,7 +303,7 @@ function draw() {
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
     // Gravel
-    ctx.fillStyle = '#7a6b5c'; ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT);
+    ctx.fillStyle = gravelColor; ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT);
     for (let i = 0; i <= CANVAS_WIDTH; i++) ctx.lineTo(i, GRAVEL_MAP[i]);
     ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT); ctx.fill();
     
@@ -336,9 +340,10 @@ function handleStart(e) {
     else if (t.id === 'clean-btn') { gravelDebris = 0; foods = foods.filter(f => !f.settled); }
     else if (t.id === 'add-fish-btn') document.getElementById('add-fish-overlay').classList.remove('hidden');
     else if (t.id === 'add-plant-btn') document.getElementById('add-plant-overlay').classList.remove('hidden');
+    else if (t.id === 'gravel-btn') document.getElementById('gravel-overlay').classList.remove('hidden');
     else if (t.id === 'reset-btn') resetGame();
     
-    // Overlays
+    // Selection Handlers
     else if (t.classList.contains('add-fish-option')) {
         fishes.push(new Fish(t.getAttribute('data-fish')));
         document.getElementById('add-fish-overlay').classList.add('hidden');
@@ -346,10 +351,16 @@ function handleStart(e) {
     else if (t.id === 'close-add-fish') document.getElementById('add-fish-overlay').classList.add('hidden');
     
     else if (t.classList.contains('add-plant-option')) {
-        plants.push(new Plant(t.getAttribute('data-plant'), 20 + Math.random() * (CANVAS_WIDTH - 40)));
+        plants.push(new Plant(t.getAttribute('data-plant'), Math.random() * CANVAS_WIDTH));
         document.getElementById('add-plant-overlay').classList.add('hidden');
     }
     else if (t.id === 'close-add-plant') document.getElementById('add-plant-overlay').classList.add('hidden');
+
+    else if (t.classList.contains('gravel-option')) {
+        gravelColor = t.getAttribute('data-color');
+        document.getElementById('gravel-overlay').classList.add('hidden');
+    }
+    else if (t.id === 'close-gravel') document.getElementById('gravel-overlay').classList.add('hidden');
 
     if (e.cancelable && t.tagName === 'BUTTON') e.preventDefault();
 }
@@ -368,6 +379,8 @@ function resetGame() {
     document.getElementById('menu-overlay').classList.remove('hidden');
     document.getElementById('game-ui').classList.add('hidden');
     document.getElementById('add-fish-overlay').classList.add('hidden');
+    document.getElementById('add-plant-overlay').classList.add('hidden');
+    document.getElementById('gravel-overlay').classList.add('hidden');
 }
 
 window.addEventListener('touchstart', handleStart, { passive: false });

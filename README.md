@@ -12,8 +12,9 @@ FishSimulator is a relaxing, interactive aquarium experience designed with a "lo
 - **Multiple Fish & Plant Species:** Choose specific varieties to customize your tank:
   - **Fish:** Goldfish, Neon Tetra, Betta, Koi.
   - **Plants:** Tall Seaweed, Short Bush, Water Fern, Red Algae.
+- **Customizable Gravel:** Change the tank's floor color (Natural, Blue, Pink, or White) to match your style.
 - **Interactive Environment:**
-  - **Selection Menus:** "ADD FISH" and "ADD PLANT" now provide menus to select exactly what you want to add.
+  - **Selection Menus:** "ADD FISH", "ADD PLANT", and "GRAVEL" now provide menus for full customization.
   - **Physics-based Feeding:** Drop food flakes and watch your fish enjoy them.
   - **Dynamic Water Quality:** Tank debris accumulates over time, subtly tinting the water.
   - **Gravel Cleaning:** Restore water clarity with the click of a button.
