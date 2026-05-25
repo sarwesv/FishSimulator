@@ -401,7 +401,6 @@ class Fish {
         ctx.restore();
     }
 }
-}
 
 // --- Main Loop ---
 
