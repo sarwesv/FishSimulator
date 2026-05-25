@@ -182,6 +182,9 @@ class Fish {
             } else if (this.type === 'pufferfish' || this.type === 'snail') {
                 dot(-3, -3, 6, 6, color);
                 dot(-4, -2, 8, 4, color);
+            } else if (this.type === 'clownfish') {
+                dot(-4, -2, 8, 4, color);
+                dot(-3, -3, 6, 6, color);
             } else if (this.type === 'guppy' || this.type === 'cory') {
                 dot(-3, -2, 6, 4, color);
                 dot(-4, -1, 8, 2, color);
