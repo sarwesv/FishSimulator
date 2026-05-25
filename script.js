@@ -244,116 +244,129 @@ class Fish {
         // --- SPECIES-SPECIFIC BIOLOGICAL DRAWING ---
         
         if (this.type === 'yellowtang') {
-            // Chunky body with thick outlines (Matching Reference)
-            dot(-4, -4, 8, 8, config.outline);
-            dot(-3, -3, 6, 6, config.c1);
-            // Face region
-            dot(1, -2, 3, 3, config.c2); // White face
-            dot(0, -1, 1, 2, '#555');    // Grey detail
-            // Fins (Blue as in reference)
-            dot(-1, -5, 4, 1, config.c3); // Dorsal
-            dot(-1, 4, 4, 1, config.c3);  // Anal
-            dot(-7, -2 + sway/p, 3, 4, config.c3); // Tail
-            // Eye
-            dot(3, -1, 1, 1, '#000');
+            dot(-4, -4, 9, 9, config.outline);
+            dot(-3, -3, 7, 7, config.c1);
+            dot(2, -2, 2, 4, config.c2); // White Face
+            dot(-2, -5, 4, 1, config.c3); // Dorsal
+            dot(-2, 4, 4, 1, config.c3);  // Anal
+            dot(-7, -2 + sway/p, 3, 5, config.c3); // Tail
+            dot(3, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'clownfish') {
-            dot(-5, -3, 10, 6, config.outline);
-            dot(-4, -2, 8, 4, config.c1);
-            dot(-3, -3, 6, 6, config.c1);
-            // Distinct black-bordered white bands
-            dot(-3, -3, 2, 6, config.outline); dot(-2, -3, 1, 6, config.c2); 
-            dot(0, -3, 2, 6, config.outline); dot(1, -3, 1, 6, config.c2);
-            dot(3, -2, 1, 4, config.outline); dot(3, -1, 1, 2, config.c2);
-            // Tail & Fins
-            dot(-6, -2 + sway/p, 3, 4, config.outline);
-            dot(-6, -1 + sway/p, 2, 2, config.c1);
-            dot(3, -1, 1, 1, '#000');
+            dot(-5, -3, 10, 7, config.outline);
+            dot(-4, -2, 8, 5, config.c1);
+            dot(-2, -3, 2, 7, config.outline); dot(-1, -2, 1, 5, config.c2); // Bands
+            dot(1, -3, 2, 7, config.outline); dot(2, -2, 1, 5, config.c2);
+            dot(-7, -2 + sway/p, 3, 5, config.outline);
+            dot(-6, -1 + sway/p, 2, 3, config.c1);
+            dot(4, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'angelfish') {
-            dot(-2, -6, 4, 12, config.outline);
-            dot(-4, -4, 8, 8, config.outline);
-            dot(-1, -5, 2, 10, config.c1);
-            dot(-3, -3, 6, 6, config.c1);
-            // Thick Stripes
-            dot(-1, -5, 1, 10, config.outline);
-            dot(1, -3, 1, 6, config.outline);
-            // Eye
-            dot(2, -1, 1, 1, '#000');
+            dot(-2, -6, 5, 13, config.outline);
+            dot(-4, -4, 9, 9, config.outline);
+            dot(-1, -5, 3, 11, config.c1);
+            dot(-3, -3, 7, 7, config.c1);
+            dot(0, -5, 1, 11, config.c3); // Stripes
+            dot(2, -3, 1, 7, config.c3);
+            dot(0, 6, 1, 4, config.c2);   // Ventral
+            dot(-6, -2 + sway/p, 3, 5, config.outline);
+            dot(3, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'platy') {
-            dot(-4, -3, 8, 7, config.outline);
-            dot(-3, -2, 6, 5, config.c1);
-            dot(-7, -3 + sway/p, 3, 6, config.outline);
-            dot(-7, -2 + sway/p, 2, 4, config.c3);
-            dot(3, -1, 1, 1, '#000');
+            dot(-5, -4, 10, 9, config.outline);
+            dot(-4, -3, 8, 7, config.c1);
+            dot(-8, -3 + sway/p, 4, 7, config.c3); // Wagtail
+            dot(-2, -6, 3, 3, config.c3);
+            dot(3, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'coralshrimp') {
-            dot(-4, -1, 8, 3, config.outline);
-            dot(-4, 0, 2, 2, config.c2); dot(-2, 0, 2, 2, config.c1); dot(0, 0, 2, 2, config.c2);
-            dot(3, -1, 6, 1, '#fff'); // Antennae
-            dot(1, 2, 4, 1, config.c2); dot(-1, 2, 4, 1, config.c2); // Claws
+            dot(-5, -2, 10, 4, config.outline);
+            dot(-4, -1, 2, 2, config.c2); dot(-2, -1, 2, 2, config.c1); dot(0, -1, 2, 2, config.c2);
+            dot(4, -3, 1, 4, '#fff'); // Antennae
+            dot(1, 2, 3, 1, config.c2); dot(-2, 2, 3, 1, config.c2); // Claws
+            dot(4, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'pufferfish') {
-            dot(-5, -4, 10, 8, config.outline);
-            dot(-4, -3, 8, 6, config.c1);
-            dot(-2, -2, 1, 1, config.c3); dot(1, 1, 1, 1, config.c3);
-            dot(3, -2, 1, 1, '#000');
+            dot(-6, -4, 11, 9, config.outline);
+            dot(-5, -3, 9, 7, config.c1);
+            dot(-5, 1, 9, 3, config.c2); // Belly
+            dot(-3, -2, 2, 2, config.c3); dot(0, -1, 2, 2, config.c3); // Spots
+            dot(-1, -6, 2, 2, 'rgba(255,255,255,0.4)');
+            dot(-1, 5, 2, 2, 'rgba(255,255,255,0.4)');
+            dot(-8, -1, 3, 3, config.outline);
+            dot(2, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'neon') {
-            dot(-6, -2, 12, 4, config.outline);
-            dot(-5, -1, 10, 2, config.c2);
-            dot(-5, -1, 10, 1, config.c1); // Blue
-            dot(-2, 0, 7, 1, config.c3);   // Red
-            dot(4, -1, 1, 1, '#000');
+            dot(-6, -2, 13, 5, config.outline);
+            dot(-5, -1, 11, 3, config.c2);
+            dot(-5, -1, 11, 1, config.c1); // Blue
+            dot(-3, 0, 7, 2, config.c3);   // Red
+            dot(-8, -2 + sway/p, 3, 5, config.c3);
+            dot(5, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'betta') {
-            dot(-4, -1, 8, 2, config.outline);
-            dot(-3, -1, 6, 2, config.c1);
-            dot(-3, -7 + sway/p, 6, 7, config.c2); 
-            dot(-3, 1 - sway/p, 6, 8, config.c2);
-            dot(-11, -5 + sway/p*2, 8, 11, config.c2);
+            dot(-5, -2, 10, 4, config.outline);
+            dot(-4, -1, 8, 2, config.c1);
+            ctx.globalAlpha = 0.8;
+            dot(-4, -8 + sway/p, 7, 7, config.c2); // Fins
+            dot(-4, 2 - sway/p, 7, 8, config.c2);
+            dot(-12, -6 + sway/p*2, 9, 13, config.c2);
+            ctx.globalAlpha = 1.0;
+            dot(3, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'goldfish') {
-            dot(-5, -4, 10, 8, config.outline);
-            dot(-4, -3, 8, 6, config.c1);
-            dot(-8, -5 + sway/p, 4, 10, config.outline);
-            dot(-7, -4 + sway/p, 3, 8, config.c3);
-            dot(3, -2, 1, 1, '#000');
+            dot(-6, -4, 11, 9, config.outline);
+            dot(-5, -3, 9, 7, config.c1);
+            dot(-3, -5, 5, 2, config.outline); // Hump
+            dot(-9, -6 + sway/p, 5, 13, config.outline); // Tail
+            dot(-8, -5 + sway/p, 3, 11, config.c3);
+            dot(4, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'koi') {
-            dot(-7, -3, 14, 6, config.outline);
-            dot(-6, -2, 12, 4, this.baseColor);
+            dot(-8, -3, 16, 7, config.outline);
+            dot(-7, -2, 14, 5, this.baseColor);
             ctx.save();
-            ctx.beginPath(); ctx.rect(Math.floor(-6*p), Math.floor(-2*p), Math.floor(12*p), Math.floor(4*p)); ctx.clip();
-            this.spots.forEach(sp => dot(sp.x*10, sp.y*4, sp.w, sp.h, sp.c));
+            ctx.beginPath(); ctx.rect(Math.floor(-7*p), Math.floor(-2*p), Math.floor(14*p), Math.floor(5*p)); ctx.clip();
+            this.spots.forEach(sp => dot(sp.x*12, sp.y*5, sp.w, sp.h, sp.c));
             ctx.restore();
-            dot(5, -1, 1, 1, '#000');
+            dot(7, 1, 2, 2, config.outline); // Barbels
+            dot(-11, -3 + sway/p, 4, 7, config.outline);
+            dot(6, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'guppy') {
-            dot(-3, -1, 6, 2, config.outline);
-            dot(-10, -5 + sway/p, 8, 10, config.outline);
-            dot(-9, -4 + sway/p, 6, 8, config.c2);
+            dot(-3, -2, 7, 4, config.outline);
+            dot(-2, -1, 5, 2, config.c1);
+            dot(-11, -5 + sway/p, 9, 11, config.outline); // Tail
+            dot(-10, -4 + sway/p, 7, 9, config.c2);
+            dot(2, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'cory') {
-            dot(-5, -2, 10, 4, config.outline);
-            dot(-4, -1, 8, 3, config.c1);
-            dot(3, 1, 1, 2, config.outline); // Barbels
+            dot(-6, -3, 12, 6, config.outline);
+            dot(-5, -2, 10, 4, config.c1);
+            dot(4, 2, 2, 2, config.outline); // Barbels
+            dot(-9, -2 + sway/p, 4, 5, config.outline);
+            dot(3, -1, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'shrimp') {
-            dot(-4, -2, 8, 4, config.outline);
-            dot(-3, -1, 6, 2, config.c1);
-            dot(3, -2, 4, 1, '#fff'); // Antennae
+            dot(-5, -2, 10, 4, config.outline);
+            dot(-4, -1, 8, 2, 'rgba(255,255,255,0.7)');
+            dot(4, -3, 5, 1, '#fff'); // Antennae
+            dot(-2, 2, 1, 2, config.outline); dot(1, 2, 1, 2, config.outline);
+            dot(3, -2, 1, 1, '#000'); // Eye
         }
         else if (this.type === 'snail') {
-            dot(-3, -4, 6, 6, config.outline);
-            dot(-2, -3, 4, 4, config.c1);
-            dot(-5, 1, 10, 2, config.c2);
+            dot(-4, -5, 8, 8, config.outline);
+            dot(-3, -4, 6, 6, config.c1);
+            dot(-2, -3, 4, 4, config.c3); // Spiral
+            dot(-6, 2, 12, 3, config.outline);
+            dot(-5, 3, 10, 1, config.c2);
+            dot(3, 0, 1, 2, config.outline); dot(5, 0, 1, 2, config.outline); // Stalks
+            dot(3, -1, 1, 1, '#000'); dot(5, -1, 1, 1, '#000'); // Eyes
         }
 
         // --- Common Features ---
         if (this.mouthTimer > 0 && this.type !== 'snail') {
-            dot(this.config.size/2/p - 1, 0, 2, 2, config.outline);
+            dot(3, 0, 2, 2, config.outline);
         }
 
         ctx.restore();
