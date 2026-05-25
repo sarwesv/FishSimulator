@@ -98,9 +98,10 @@ class Fish {
     constructor(type) {
         this.type = type;
         this.config = FISH_TYPES[type] || FISH_TYPES.goldfish;
-        this.x = 40 + Math.random() * (CANVAS_WIDTH - 80);
-        this.y = 40 + Math.random() * (CANVAS_HEIGHT - 80);
-        if (this.config.habitat === 'bottom') this.y = CANVAS_HEIGHT - 15;
+        // Spawn centered in the tank
+        this.x = canvas.width / 2 + (Math.random() - 0.5) * 40;
+        this.y = canvas.height / 2 + (Math.random() - 0.5) * 40;
+        if (this.config.habitat === 'bottom') this.y = canvas.height - 15;
         this.vx = 0; this.vy = 0;
         this.targetX = this.x; this.targetY = this.y;
         this.flip = false;
@@ -115,6 +116,15 @@ class Fish {
 
     update() {
         this.animTimer += 0.15;
+
+        // Boundary Safety Check
+        if (this.x < -20 || this.x > canvas.width + 20 || this.y < -20 || this.y > canvas.height + 20) {
+            this.x = canvas.width / 2;
+            this.y = canvas.height / 2;
+            this.targetX = this.x;
+            this.targetY = this.y;
+        }
+
         if (this.idleTimer > 0) {
             this.idleTimer--;
             this.vx *= 0.94; this.vy *= 0.94;
