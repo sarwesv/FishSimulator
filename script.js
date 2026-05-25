@@ -4,26 +4,24 @@
  */
 
 // --- Constants & Config ---
-// Increased resolution for better definition while keeping pixel style
-const CANVAS_WIDTH = 240; 
-const CANVAS_HEIGHT = 150;
+// High resolution for smoother fish while maintaining pixelated style
+const CANVAS_WIDTH = 480; 
+const CANVAS_HEIGHT = 300;
 const FRICTION = 0.98;
 
 const FISH_TYPES = {
-    goldfish: { color: '#ff9900', size: 14, speed: 0.5, turnRate: 0.02 },
-    neon: { color: '#4444ff', size: 10, speed: 0.8, turnRate: 0.03 },
-    betta: { color: '#cc0022', size: 18, speed: 0.3, turnRate: 0.015 },
-    koi: { color: '#f5f5dc', size: 20, speed: 0.4, turnRate: 0.02 } 
+    goldfish: { color: '#ff9900', size: 28, speed: 0.5, turnRate: 0.02 },
+    neon: { color: '#4444ff', size: 20, speed: 0.8, turnRate: 0.03 },
+    betta: { color: '#cc0022', size: 36, speed: 0.3, turnRate: 0.015 },
+    koi: { color: '#f5f5dc', size: 40, speed: 0.4, turnRate: 0.02 } 
 };
 
 // --- Game State ---
 let state = 'MENU';
-let fishes = [];
-let plants = [];
+let fish = null;
 let foods = [];
 let bubbles = [];
 let gravelDebris = 0;
-let selectedFishTypes = new Set();
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -31,44 +29,18 @@ ctx.imageSmoothingEnabled = false;
 
 // --- Entities ---
 
-class Plant {
-    constructor(x) {
-        this.x = x;
-        this.y = CANVAS_HEIGHT - 12;
-        this.height = 15 + Math.random() * 25;
-        this.width = 4 + Math.random() * 4;
-        this.segments = Math.floor(this.height / 5);
-        this.offset = Math.random() * Math.PI * 2;
-        this.color = Math.random() > 0.5 ? '#228822' : '#22aa44';
-    }
-
-    draw() {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.width;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        
-        for (let i = 1; i <= this.segments; i++) {
-            let sway = Math.sin(Date.now() * 0.002 + this.offset + i * 0.5) * (i * 1.5);
-            ctx.lineTo(this.x + sway, this.y - (i * (this.height / this.segments)));
-        }
-        ctx.stroke();
-    }
-}
-
 class Bubble {
     constructor(x, y, isBig = false) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 0.2;
-        this.vy = -Math.random() * 0.3 - 0.1;
-        this.size = isBig ? (Math.random() * 3 + 2) : (Math.random() * 1.6 + 0.8);
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = -Math.random() * 0.6 - 0.2;
+        this.size = isBig ? (Math.random() * 6 + 4) : (Math.random() * 3.2 + 1.6);
         this.life = isBig ? 120 : 80;
     }
     update() {
         this.x += this.vx; this.y += this.vy; this.life--;
-        this.vx += Math.sin(this.life * 0.1) * 0.02;
+        this.vx += Math.sin(this.life * 0.1) * 0.04;
     }
     draw() {
         ctx.fillStyle = 'rgba(150, 200, 255, 0.2)';
@@ -78,21 +50,21 @@ class Bubble {
 
 class Food {
     constructor(x, y) {
-        this.x = x; this.y = y; this.vy = 0.3;
+        this.x = x; this.y = y; this.vy = 0.6;
         this.settled = false; this.life = 400; 
     }
     update() {
         if (!this.settled) {
             this.y += this.vy;
-            if (this.y >= CANVAS_HEIGHT - 8) {
-                this.y = CANVAS_HEIGHT - 8; this.settled = true;
+            if (this.y >= CANVAS_HEIGHT - 16) {
+                this.y = CANVAS_HEIGHT - 16; this.settled = true;
                 gravelDebris = Math.min(100, gravelDebris + 2);
             }
         } else { this.life--; }
     }
     draw() {
         ctx.fillStyle = '#ccaa00';
-        ctx.fillRect(this.x, this.y, 3, 3);
+        ctx.fillRect(this.x, this.y, 6, 6);
     }
 }
 
@@ -113,9 +85,9 @@ class Fish {
             this.pattern = [];
             for(let i=0; i<6; i++) {
                 this.pattern.push({
-                    x: Math.random() * 16 - 8,
-                    y: Math.random() * 6 - 3,
-                    r: Math.random() * 4 + 2,
+                    x: Math.random() * 32 - 16,
+                    y: Math.random() * 12 - 6,
+                    r: Math.random() * 8 + 4,
                     c: Math.random() > 0.5 ? '#ff4400' : '#000000'
                 });
             }
@@ -130,20 +102,20 @@ class Fish {
             this.vx *= 0.95;
             this.vy *= 0.95;
         } else {
-            if (Math.abs(this.x - this.targetX) < 20 && Math.abs(this.y - this.targetY) < 20) {
+            if (Math.abs(this.x - this.targetX) < 40 && Math.abs(this.y - this.targetY) < 40) {
                 if (Math.random() < 0.02) {
                     this.idleTimer = 60 + Math.random() * 120;
                 } else {
                     const isLongDistance = Math.random() < 0.3;
                     if (isLongDistance) {
                         this.targetX = this.x < CANVAS_WIDTH / 2 ? 
-                            (CANVAS_WIDTH - 60) - Math.random() * 40 : 
-                            40 + Math.random() * 40;
-                        this.targetY = 40 + Math.random() * (CANVAS_HEIGHT - 80);
+                            (CANVAS_WIDTH - 120) - Math.random() * 80 : 
+                            80 + Math.random() * 80;
+                        this.targetY = 80 + Math.random() * (CANVAS_HEIGHT - 160);
                         this.currentSpeedBoost = 1.5;
                     } else {
-                        this.targetX = Math.max(30, Math.min(CANVAS_WIDTH - 30, this.x + (Math.random() - 0.5) * 80));
-                        this.targetY = Math.max(30, Math.min(CANVAS_HEIGHT - 30, this.y + (Math.random() - 0.5) * 60));
+                        this.targetX = Math.max(60, Math.min(CANVAS_WIDTH - 60, this.x + (Math.random() - 0.5) * 160));
+                        this.targetY = Math.max(60, Math.min(CANVAS_HEIGHT - 60, this.y + (Math.random() - 0.5) * 120));
                         this.currentSpeedBoost = 1.0;
                     }
                 }
@@ -161,8 +133,8 @@ class Fish {
 
         this.vx *= FRICTION; this.vy *= FRICTION;
         this.x += this.vx; this.y += this.vy;
-        if (this.vx > 0.1) this.flip = false;
-        if (this.vx < -0.1) this.flip = true;
+        if (this.vx > 0.2) this.flip = false;
+        if (this.vx < -0.2) this.flip = true;
 
         foods.forEach((f, index) => {
             let fdx = f.x - this.x; let fdy = f.y - this.y;
@@ -174,7 +146,7 @@ class Fish {
             const count = Math.floor(Math.random() * 3) + 1;
             for(let i=0; i<count; i++) {
                 setTimeout(() => {
-                    bubbles.push(new Bubble(this.x + (this.flip ? -6 : 6), this.y - 2, true));
+                    bubbles.push(new Bubble(this.x + (this.flip ? -12 : 12), this.y - 4, true));
                 }, i * 300);
             }
             this.bubbleTimer = 300 + Math.random() * 600;
@@ -187,124 +159,55 @@ class Fish {
         if (this.flip) ctx.scale(-1, 1);
         
         const s = this.config.size;
-        const speedFactor = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 2;
-        const tailWobble = Math.sin(this.animTimer) * (2 + speedFactor);
-        const finWobble = Math.sin(this.animTimer * 1.5) * 2;
+        const speedFactor = Math.sqrt(this.vx * this.vx + this.vy * this.vy) * 1.5;
+        const tailWobble = Math.sin(this.animTimer) * (4 + speedFactor);
         
         ctx.fillStyle = this.config.color;
 
         if (this.type === 'goldfish') {
-            // Dorsal Fin
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.6, 0, 0, Math.PI*2); ctx.fill();
             ctx.beginPath();
-            ctx.moveTo(-s*0.4, -s*0.4);
-            ctx.quadraticCurveTo(-s*0.6, -s*0.9, -s, -s*0.4);
+            ctx.moveTo(-s+8, 0);
+            ctx.quadraticCurveTo(-s-16, -s*0.8 + tailWobble, -s-24, -s*0.4);
+            ctx.lineTo(-s-24, s*0.4);
+            ctx.quadraticCurveTo(-s-16, s*0.8 - tailWobble, -s+8, 0);
             ctx.fill();
-
-            // Pectoral Fin
-            ctx.beginPath();
-            ctx.moveTo(s*0.2, s*0.2);
-            ctx.quadraticCurveTo(s*0.4, s*0.5 + finWobble, 0, s*0.6);
-            ctx.fill();
-
-            // Body
-            ctx.beginPath(); 
-            ctx.ellipse(0, 0, s, s*0.65, 0, 0, Math.PI*2); 
-            ctx.fill();
-
-            // Tail (Flowing fan tail)
-            ctx.beginPath();
-            ctx.moveTo(-s+2, 0);
-            ctx.bezierCurveTo(-s-10, -s*1.2 + tailWobble, -s-20, -s*0.5, -s-15, 0);
-            ctx.bezierCurveTo(-s-20, s*0.5, -s-10, s*1.2 - tailWobble, -s+2, 0);
-            ctx.fill();
-            
-            // Highlight
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.beginPath(); ctx.ellipse(s*0.3, -s*0.2, s*0.4, s*0.2, 0.2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.5); ctx.lineTo(-s*0.6, -s*0.8); ctx.lineTo(-s, -s*0.4); ctx.fill();
         } 
         else if (this.type === 'neon') {
-            // Body
             ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
-            
-            // Neon Glow Stripe
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = '#00ffff';
             ctx.fillStyle = '#00ffff';
-            ctx.fillRect(-s*0.6, -2, s*1.2, 2);
-            ctx.shadowBlur = 0;
-
-            // Red Stripe
+            ctx.fillRect(-s*0.5, -4, s, 6);
             ctx.fillStyle = '#ff3333';
-            ctx.fillRect(-s*0.2, 1, s*0.8, 2);
-
-            // Tail
-            ctx.beginPath(); 
-            ctx.moveTo(-s+2, 0); 
-            ctx.lineTo(-s-8, -s*0.5 + tailWobble/2); 
-            ctx.lineTo(-s-8, s*0.5 - tailWobble/2); 
-            ctx.fill();
-
-            // Small Fins
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.beginPath(); ctx.moveTo(0, -s*0.3); ctx.lineTo(-s*0.3, -s*0.5); ctx.lineTo(-s*0.5, -s*0.3); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-s+4, 0); ctx.lineTo(-s-12, -s*0.4 + tailWobble/2); ctx.lineTo(-s-12, s*0.4 - tailWobble/2); ctx.fill();
         }
         else if (this.type === 'betta') {
-            // Body
-            ctx.beginPath(); ctx.ellipse(0, 0, s*0.8, s*0.35, 0, 0, Math.PI*2); ctx.fill();
-            
-            // Elaborate Fins (flowing)
-            ctx.fillStyle = '#990011';
-            
-            // Tail
+            ctx.beginPath(); ctx.ellipse(0, 0, s*0.7, s*0.3, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#cc0022';
             ctx.beginPath();
             ctx.moveTo(-s*0.5, 0);
-            ctx.bezierCurveTo(-s*1.5, -s*1.8 + tailWobble, -s*3.5, -s*1.0, -s*3.2, 0);
-            ctx.bezierCurveTo(-s*3.5, s*1.0, -s*1.5, s*1.8 - tailWobble, -s*0.5, 0);
+            ctx.bezierCurveTo(-s*1.5, -s*1.2 + tailWobble, -s*2.5, -s*0.5, -s*2.5, 0);
+            ctx.bezierCurveTo(-s*2.5, s*0.5, -s*1.5, s*1.2 - tailWobble, -s*0.5, 0);
             ctx.fill();
-            
-            // Dorsal
-            ctx.beginPath(); 
-            ctx.moveTo(s*0.1, -s*0.2); 
-            ctx.bezierCurveTo(-s*0.5, -s*1.5, -s*1.5, -s*1.2, -s*1.2, -s*0.3); 
-            ctx.fill();
-            
-            // Ventral
-            ctx.beginPath(); 
-            ctx.moveTo(s*0.1, s*0.2); 
-            ctx.bezierCurveTo(-s*0.5, s*1.5, -s*1.5, s*1.2, -s*1.2, s*0.3); 
-            ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.quadraticCurveTo(-s*0.5, -s*1.2, -s, -s*0.5); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.quadraticCurveTo(-s*0.5, s*1.2, -s, s*0.5); ctx.fill();
         }
         else if (this.type === 'koi') {
-            // Body
-            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.4, 0, 0, Math.PI*2); ctx.fill();
-            
-            // Patterns
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
             this.pattern.forEach(p => {
                 ctx.fillStyle = p.c;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
             });
-            
-            // Fins
             ctx.fillStyle = this.config.color;
-            // Pectoral fins (pair)
-            ctx.beginPath(); ctx.ellipse(s*0.2, s*0.3, s*0.3, s*0.15, 0.5 + finWobble*0.1, 0, Math.PI*2); ctx.fill();
-            
-            // Tail
-            ctx.beginPath(); ctx.moveTo(-s+4, 0); ctx.lineTo(-s-10, -s*0.6 + tailWobble); ctx.lineTo(-s-10, s*0.6 - tailWobble); ctx.fill();
-            
-            // Barbels (Whiskers)
-            ctx.strokeStyle = '#ccc';
-            ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(s-2, 2); ctx.quadraticCurveTo(s+6, 8, s+4, 12); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(s-2, -2); ctx.quadraticCurveTo(s+6, -8, s+4, -12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-s+8, 0); ctx.lineTo(-s-16, -s*0.5 + tailWobble); ctx.lineTo(-s-16, s*0.5 - tailWobble); ctx.fill();
+            ctx.strokeStyle = this.config.color;
+            ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(s-4, 4); ctx.lineTo(s+8, 12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s-4, -4); ctx.lineTo(s+8, -12); ctx.stroke();
         }
 
-        // Eye
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(s*0.6, -s*0.1, 2.5, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = '#000';
-        ctx.beginPath(); ctx.arc(s*0.7, -s*0.1, 1.2, 0, Math.PI*2); ctx.fill();
-        
+        ctx.fillRect(s*0.5, -4, 4, 4);
         ctx.restore();
     }
 }
@@ -313,7 +216,7 @@ class Fish {
 
 function update() {
     if (state === 'PLAYING') {
-        fishes.forEach(f => f.update());
+        fish.update();
         foods.forEach((f, i) => { f.update(); if (f.life <= 0) foods.splice(i, 1); });
         bubbles.forEach((b, i) => { b.update(); if (b.life <= 0) bubbles.splice(i, 1); });
     }
@@ -330,80 +233,41 @@ function draw() {
     
     // Gravel
     ctx.fillStyle = '#887766';
-    ctx.fillRect(0, CANVAS_HEIGHT - 12, CANVAS_WIDTH, 12);
+    ctx.fillRect(0, CANVAS_HEIGHT - 24, CANVAS_WIDTH, 24);
     
     if (gravelDebris > 0) {
         ctx.fillStyle = `rgba(50, 40, 0, ${gravelDebris/100})`;
         for(let i=0; i<gravelDebris; i++) {
             let dx = ((Math.sin(i * 13) + 1) / 2) * CANVAS_WIDTH;
-            ctx.fillRect(dx, CANVAS_HEIGHT - 15 + Math.cos(i * 7) * 4, 3, 3);
+            ctx.fillRect(dx, CANVAS_HEIGHT - 30 + Math.cos(i * 7) * 8, 6, 6);
         }
     }
 
     if (state === 'PLAYING') {
-        plants.forEach(p => p.draw());
         bubbles.forEach(b => b.draw());
         foods.forEach(f => f.draw());
-        fishes.forEach(f => f.draw());
+        fish.draw();
     }
 }
 
 // --- Input Handling ---
 
 function handleStart(e) {
-    const target = e.target;
-    
-    // Initial Selection
-    if (target.classList.contains('selection-btn')) {
-        const type = target.getAttribute('data-fish');
-        if (selectedFishTypes.has(type)) {
-            selectedFishTypes.delete(type);
-            target.classList.remove('selected');
-        } else {
-            selectedFishTypes.add(type);
-            target.classList.add('selected');
-        }
-        
-        const startBtn = document.getElementById('start-btn');
-        if (selectedFishTypes.size > 0) {
-            startBtn.classList.remove('hidden');
-        } else {
-            startBtn.classList.add('hidden');
-        }
-    } 
-    else if (target.id === 'start-btn') {
-        startGame();
-    }
-    
-    // Mid-game UI
-    else if (target.id === 'feed-btn') {
-        foods.push(new Food(20 + Math.random() * (CANVAS_WIDTH - 40), 0));
-    } else if (target.id === 'clean-btn') {
+    if (e.target.classList.contains('menu-btn')) {
+        startGame(e.target.getAttribute('data-fish'));
+    } else if (e.target.id === 'feed-btn') {
+        foods.push(new Food(40 + Math.random() * (CANVAS_WIDTH - 80), 0));
+    } else if (e.target.id === 'clean-btn') {
         gravelDebris = 0;
         foods = foods.filter(f => !f.settled);
-    } else if (target.id === 'add-fish-btn') {
-        document.getElementById('add-fish-overlay').classList.remove('hidden');
-    } else if (target.id === 'add-plant-btn') {
-        plants.push(new Plant(Math.random() * CANVAS_WIDTH));
-    } else if (target.id === 'reset-btn') {
+    } else if (e.target.id === 'reset-btn') {
         resetGame();
     }
-    
-    // Add Fish Overlay
-    else if (target.classList.contains('add-fish-option')) {
-        fishes.push(new Fish(target.getAttribute('data-fish')));
-        document.getElementById('add-fish-overlay').classList.add('hidden');
-    } else if (target.id === 'close-add-fish') {
-        document.getElementById('add-fish-overlay').classList.add('hidden');
-    }
-
-    if (e.cancelable && target.tagName === 'BUTTON') e.preventDefault();
+    if (e.cancelable) e.preventDefault();
 }
 
-function startGame() {
-    selectedFishTypes.forEach(type => {
-        fishes.push(new Fish(type));
-    });
+function startGame(type) {
+    fish = new Fish(type);
     state = 'PLAYING';
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('game-ui').classList.remove('hidden');
@@ -411,15 +275,9 @@ function startGame() {
 
 function resetGame() {
     state = 'MENU';
-    fishes = []; plants = []; foods = []; bubbles = []; gravelDebris = 0;
-    selectedFishTypes.clear();
-    
-    // Reset UI
-    document.querySelectorAll('.selection-btn').forEach(btn => btn.classList.remove('selected'));
-    document.getElementById('start-btn').classList.add('hidden');
+    fish = null; foods = []; bubbles = []; gravelDebris = 0;
     document.getElementById('menu-overlay').classList.remove('hidden');
     document.getElementById('game-ui').classList.add('hidden');
-    document.getElementById('add-fish-overlay').classList.add('hidden');
 }
 
 window.addEventListener('touchstart', handleStart, { passive: false });
