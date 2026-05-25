@@ -367,14 +367,18 @@ function update() {
 
 function draw() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    let b = 255 - (gravelDebris * 1.5); let g = 180 - (gravelDebris * 0.5);
+    // Background Water (Fully opaque)
+    let b = Math.floor(255 - (gravelDebris * 1.5)); 
+    let g = Math.floor(180 - (gravelDebris * 0.5));
     ctx.fillStyle = `rgb(0, ${g}, ${b})`;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
+    // Gravel (Pixel-aligned vertical bars to prevent fading)
     ctx.fillStyle = gravelColor;
-    ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT);
-    for (let i = 0; i <= CANVAS_WIDTH; i++) ctx.lineTo(i, GRAVEL_MAP[i]);
-    ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT); ctx.fill();
+    for (let i = 0; i < CANVAS_WIDTH; i++) {
+        const floorY = Math.floor(GRAVEL_MAP[i]);
+        ctx.fillRect(i, floorY, 1, CANVAS_HEIGHT - floorY);
+    }
     
     if (state === 'PLAYING') {
         plants.forEach(p => p.draw());
