@@ -6,23 +6,21 @@
 // --- Constants & Config ---
 const CANVAS_WIDTH = 120;
 const CANVAS_HEIGHT = 75;
-const GRAVITY = 0.05;
 const FRICTION = 0.98;
 
 const FISH_TYPES = {
-    goldfish: { color: '#ff9900', size: 6, speed: 0.5 },
-    neon: { color: '#00ffff', size: 4, speed: 0.8 },
-    betta: { color: '#ff0055', size: 8, speed: 0.3 },
-    koi: { color: '#f5f5dc', size: 9, speed: 0.4 } // Cream color body
+    goldfish: { color: '#ff9900', size: 7, speed: 0.5 },
+    neon: { color: '#4444ff', size: 5, speed: 0.8 }, // Brighter blue
+    betta: { color: '#cc0022', size: 9, speed: 0.3 },
+    koi: { color: '#f5f5dc', size: 10, speed: 0.4 } 
 };
 
 // --- Game State ---
 let state = 'MENU';
-let selectedFishType = null;
 let fish = null;
 let foods = [];
 let bubbles = [];
-let gravelDebris = 0; // 0 to 100
+let gravelDebris = 0;
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -39,43 +37,29 @@ class Bubble {
         this.size = Math.random() * 0.8 + 0.4;
         this.life = 80;
     }
-
     update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.life--;
+        this.x += this.vx; this.y += this.vy; this.life--;
     }
-
     draw() {
-        ctx.fillStyle = 'rgba(150, 200, 255, 0.15)'; // Very subtle blue
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = 'rgba(150, 200, 255, 0.15)';
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
     }
 }
 
 class Food {
     constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.vy = 0.15;
-        this.settled = false;
-        this.life = 400; 
+        this.x = x; this.y = y; this.vy = 0.15;
+        this.settled = false; this.life = 400; 
     }
-
     update() {
         if (!this.settled) {
             this.y += this.vy;
             if (this.y >= CANVAS_HEIGHT - 4) {
-                this.y = CANVAS_HEIGHT - 4;
-                this.settled = true;
+                this.y = CANVAS_HEIGHT - 4; this.settled = true;
                 gravelDebris = Math.min(100, gravelDebris + 2);
             }
-        } else {
-            this.life--;
-        }
+        } else { this.life--; }
     }
-
     draw() {
         ctx.fillStyle = '#ccaa00';
         ctx.fillRect(this.x, this.y, 1.5, 1.5);
@@ -88,20 +72,19 @@ class Fish {
         this.config = FISH_TYPES[type];
         this.x = CANVAS_WIDTH / 2;
         this.y = CANVAS_HEIGHT / 2;
-        this.vx = 0;
-        this.vy = 0;
-        this.targetX = this.x;
-        this.targetY = this.y;
+        this.vx = 0; this.vy = 0;
+        this.targetX = this.x; this.targetY = this.y;
         this.flip = false;
         this.bubbleTimer = 0;
+        this.animTimer = 0;
         
         if (type === 'koi') {
             this.pattern = [];
-            for(let i=0; i<5; i++) {
+            for(let i=0; i<6; i++) {
                 this.pattern.push({
-                    x: Math.random() * 6 - 3,
-                    y: Math.random() * 2 - 1,
-                    r: Math.random() * 2 + 0.5,
+                    x: Math.random() * 8 - 4,
+                    y: Math.random() * 3 - 1.5,
+                    r: Math.random() * 2 + 1,
                     c: Math.random() > 0.5 ? '#ff4400' : '#000000'
                 });
             }
@@ -109,35 +92,26 @@ class Fish {
     }
 
     update() {
+        this.animTimer += 0.15;
         if (Math.abs(this.x - this.targetX) < 5 && Math.abs(this.y - this.targetY) < 5) {
             this.targetX = 15 + Math.random() * (CANVAS_WIDTH - 30);
             this.targetY = 15 + Math.random() * (CANVAS_HEIGHT - 30);
         }
-
         let dx = this.targetX - this.x;
         let dy = this.targetY - this.y;
         let dist = Math.sqrt(dx * dx + dy * dy);
-        
         if (dist > 1) {
             this.vx += (dx / dist) * this.config.speed * 0.04;
             this.vy += (dy / dist) * this.config.speed * 0.04;
         }
-
-        this.vx *= FRICTION;
-        this.vy *= FRICTION;
-        this.x += this.vx;
-        this.y += this.vy;
-
+        this.vx *= FRICTION; this.vy *= FRICTION;
+        this.x += this.vx; this.y += this.vy;
         if (this.vx > 0.01) this.flip = false;
         if (this.vx < -0.01) this.flip = true;
 
         foods.forEach((f, index) => {
-            let fdx = f.x - this.x;
-            let fdy = f.y - this.y;
-            let fdist = Math.sqrt(fdx * fdx + fdy * fdy);
-            if (fdist < this.config.size) {
-                foods.splice(index, 1);
-            }
+            let fdx = f.x - this.x; let fdy = f.y - this.y;
+            if (Math.sqrt(fdx * fdx + fdy * fdy) < this.config.size) foods.splice(index, 1);
         });
 
         this.bubbleTimer++;
@@ -151,42 +125,70 @@ class Fish {
         ctx.save();
         ctx.translate(this.x, this.y);
         if (this.flip) ctx.scale(-1, 1);
-        const size = this.config.size;
-        ctx.fillStyle = this.config.color;
         
-        ctx.beginPath();
-        if (this.type === 'betta') {
-            ctx.ellipse(0, 0, size, size/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#aa0033';
+        const s = this.config.size;
+        const tailWobble = Math.sin(this.animTimer) * 2;
+        
+        ctx.fillStyle = this.config.color;
+
+        if (this.type === 'goldfish') {
+            // Body
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.6, 0, 0, Math.PI*2); ctx.fill();
+            // Tail (Flowing)
             ctx.beginPath();
-            ctx.moveTo(-size/2, -size/4);
-            ctx.quadraticCurveTo(-size, -size/2, -size*1.2, 0);
-            ctx.quadraticCurveTo(-size, size/2, -size/2, size/4);
+            ctx.moveTo(-s+2, 0);
+            ctx.quadraticCurveTo(-s-4, -s*0.8 + tailWobble, -s-6, -s*0.4);
+            ctx.lineTo(-s-6, s*0.4);
+            ctx.quadraticCurveTo(-s-4, s*0.8 - tailWobble, -s+2, 0);
             ctx.fill();
-        } else if (this.type === 'koi') {
-            ctx.ellipse(0, 0, size, size/3, 0, 0, Math.PI * 2);
+            // Top Fin
+            ctx.beginPath(); ctx.moveTo(-s*0.2, -s*0.5); ctx.lineTo(-s*0.6, -s*0.8); ctx.lineTo(-s, -s*0.4); ctx.fill();
+        } 
+        else if (this.type === 'neon') {
+            // Body (Streamlined)
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            // Neon Stripe
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(-s*0.5, -1, s, 1.5);
+            // Red Tail
+            ctx.fillStyle = '#ff3333';
+            ctx.beginPath(); ctx.moveTo(-s+1, 0); ctx.lineTo(-s-3, -s*0.4 + tailWobble/2); ctx.lineTo(-s-3, s*0.4 - tailWobble/2); ctx.fill();
+        }
+        else if (this.type === 'betta') {
+            // Body
+            ctx.beginPath(); ctx.ellipse(0, 0, s*0.7, s*0.3, 0, 0, Math.PI*2); ctx.fill();
+            // Massive Flowing Tail
+            ctx.fillStyle = '#990011';
+            ctx.beginPath();
+            ctx.moveTo(-s*0.5, 0);
+            ctx.bezierCurveTo(-s*1.5, -s*1.2 + tailWobble, -s*2.5, -s*0.5, -s*2.5, 0);
+            ctx.bezierCurveTo(-s*2.5, s*0.5, -s*1.5, s*1.2 - tailWobble, -s*0.5, 0);
             ctx.fill();
+            // Long Fins
+            ctx.beginPath(); ctx.moveTo(0, -s*0.2); ctx.quadraticCurveTo(-s*0.5, -s*1.2, -s, -s*0.5); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(0, s*0.2); ctx.quadraticCurveTo(-s*0.5, s*1.2, -s, s*0.5); ctx.fill();
+        }
+        else if (this.type === 'koi') {
+            // Body (Longer)
+            ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.35, 0, 0, Math.PI*2); ctx.fill();
+            // Pattern
             this.pattern.forEach(p => {
                 ctx.fillStyle = p.c;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
             });
-        } else {
-            ctx.ellipse(0, 0, size, size/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(-size + 1, 0);
-            ctx.lineTo(-size - 2, -size/2);
-            ctx.lineTo(-size - 2, size/2);
-            ctx.closePath();
-            ctx.fill();
+            // Tail
+            ctx.fillStyle = this.config.color;
+            ctx.beginPath(); ctx.moveTo(-s+2, 0); ctx.lineTo(-s-4, -s*0.5 + tailWobble); ctx.lineTo(-s-4, s*0.5 - tailWobble); ctx.fill();
+            // Barbels (Whiskers)
+            ctx.strokeStyle = this.config.color;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(s-1, 1); ctx.lineTo(s+2, 3); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(s-1, -1); ctx.lineTo(s+2, -3); ctx.stroke();
         }
 
-        // Eye (Single pixel for ultra-retro)
+        // Integrated Eye
         ctx.fillStyle = '#000';
-        ctx.fillRect(size/2, -0.5, 1, 1);
+        ctx.fillRect(s*0.5, -1, 1, 1);
         ctx.restore();
     }
 }
@@ -215,7 +217,6 @@ function draw() {
     if (gravelDebris > 0) {
         ctx.fillStyle = `rgba(50, 40, 0, ${gravelDebris/100})`;
         for(let i=0; i<gravelDebris; i++) {
-            // Fix debris distribution logic
             let dx = ((Math.sin(i * 13) + 1) / 2) * CANVAS_WIDTH;
             ctx.fillRect(dx, CANVAS_HEIGHT - 8 + Math.cos(i * 7) * 2, 1.5, 1.5);
         }
