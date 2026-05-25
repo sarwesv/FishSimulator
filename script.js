@@ -53,7 +53,8 @@ const PLANT_TYPES = {
     seaweed: { color: '#1e6b1e', height: 40 },
     fern: { color: '#228a44', height: 25 },
     grass: { color: '#3a9d23', height: 15 },
-    kelp: { color: '#567d46', height: 60 }
+    kelp: { color: '#567d46', height: 60 },
+    anemone: { color: '#ff66aa', height: 20 }
 };
 
 // --- Game State ---
@@ -78,12 +79,35 @@ class Plant {
         this.color = config.color;
     }
     draw() {
-        ctx.fillStyle = this.color;
-        const segments = 4;
-        const sh = this.height / segments;
-        for (let i = 0; i < segments; i++) {
-            let sway = Math.sin(Date.now() * 0.002 + this.offset + i * 0.8) * 4;
-            ctx.fillRect(Math.floor(this.x + sway - 2), Math.floor(this.y - (i + 1) * sh), 4, Math.floor(sh + 1));
+        if (this.type === 'anemone') {
+            ctx.save();
+            ctx.translate(Math.floor(this.x), Math.floor(this.y));
+            // Fleshy Base
+            ctx.fillStyle = '#aa4477';
+            ctx.fillRect(-5, -4, 10, 4);
+            ctx.fillRect(-6, -2, 12, 2);
+            // Crown of Tentacles
+            ctx.fillStyle = this.color;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 7) * Math.PI - Math.PI; // Radiate upwards
+                const sway = Math.sin(Date.now() * 0.002 + this.offset + i) * 4;
+                const dist = 8 + sway;
+                const tx = Math.floor(Math.cos(angle) * dist);
+                const ty = Math.floor(Math.sin(angle) * dist) - 4;
+                
+                ctx.fillRect(tx - 1, ty - 1, 3, 3); // Tentacle tip
+                // Connection dots for blocky look
+                ctx.fillRect(Math.floor(tx/2) - 1, Math.floor(ty/2) - 2, 2, 2);
+            }
+            ctx.restore();
+        } else {
+            ctx.fillStyle = this.color;
+            const segments = 4;
+            const sh = this.height / segments;
+            for (let i = 0; i < segments; i++) {
+                let sway = Math.sin(Date.now() * 0.002 + this.offset + i * 0.8) * 4;
+                ctx.fillRect(Math.floor(this.x + sway - 2), Math.floor(this.y - (i + 1) * sh), 4, Math.floor(sh + 1));
+            }
         }
     }
 }
