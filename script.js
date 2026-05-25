@@ -263,7 +263,12 @@ function handleStart(e) {
 }
 
 function startGame() {
-    selectedFishTypes.forEach(type => fishes.push(new Fish(type)));
+    fishes = []; // Ensure array is empty
+    if (selectedFishTypes.size > 0) {
+        selectedFishTypes.forEach(type => {
+            fishes.push(new Fish(type));
+        });
+    }
     state = 'PLAYING';
     document.getElementById('menu-overlay').classList.add('hidden');
     document.getElementById('game-ui').classList.remove('hidden');
