@@ -1,6 +1,6 @@
 /**
  * Fish Simulator
- * High-Quality Pixel-Perfect 'Pixel Fishing' Simulation
+ * Pixel-Perfect 'Pixel Fishing' Simulation with Clipped Patterns
  */
 
 // --- Dynamic Resolution ---
@@ -34,7 +34,17 @@ const FISH_TYPES = {
     betta: { c1: '#cc0022', c2: '#ff3355', c3: '#660000', outline: '#220000', size: 15 },
     guppy: { c1: '#00ffcc', c2: '#ff66ff', c3: '#008866', outline: '#002211', size: 12 },
     pufferfish: { c1: '#ccaa88', c2: '#eeddcc', c3: '#886644', outline: '#443311', size: 12 },
-    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 12 }
+    clownfish: { c1: '#ff6600', c2: '#ffffff', c3: '#000000', outline: '#221100', size: 12 },
+    cory: { c1: '#a08860', c2: '#504030', c3: '#706040', outline: '#332211', size: 12, habitat: 'bottom' },
+    shrimp: { c1: '#ff4444', c2: '#ffffff', c3: '#aa2222', outline: '#440000', size: 8, habitat: 'bottom' },
+    snail: { c1: '#886644', c2: '#ccaa88', c3: '#553311', outline: '#221100', size: 10, habitat: 'bottom' }
+};
+
+const PLANT_TYPES = {
+    seaweed: { color: '#1e6b1e', height: 40 },
+    fern: { color: '#228a44', height: 25 },
+    grass: { color: '#3a9d23', height: 15 },
+    kelp: { color: '#567d46', height: 60 }
 };
 
 // --- Game State ---
@@ -51,13 +61,15 @@ let selectedFishTypes = new Set();
 class Plant {
     constructor(type, x) {
         this.type = type;
+        const config = PLANT_TYPES[type] || PLANT_TYPES.seaweed;
         this.x = x;
         this.y = GRAVEL_MAP[Math.floor(x)] || CANVAS_HEIGHT - 10;
-        this.height = 20 + Math.random() * 20;
+        this.height = config.height * (0.8 + Math.random() * 0.4);
         this.offset = Math.random() * 10;
+        this.color = config.color;
     }
     draw() {
-        ctx.fillStyle = '#1e7b1e';
+        ctx.fillStyle = this.color;
         const segments = 4;
         const sh = this.height / segments;
         for (let i = 0; i < segments; i++) {
@@ -88,13 +100,17 @@ class Fish {
         this.config = FISH_TYPES[type] || FISH_TYPES.goldfish;
         this.x = 40 + Math.random() * (CANVAS_WIDTH - 80);
         this.y = 40 + Math.random() * (CANVAS_HEIGHT - 80);
-        if (this.type === 'pufferfish' || this.type === 'cory') this.y = CANVAS_HEIGHT - 20;
+        if (this.config.habitat === 'bottom') this.y = CANVAS_HEIGHT - 15;
         this.vx = 0; this.vy = 0;
         this.targetX = this.x; this.targetY = this.y;
         this.flip = false;
         this.animTimer = Math.random() * 10;
         this.idleTimer = 0;
-        this.mouthTimer = 0;
+        
+        if (type === 'koi') {
+            this.spots = [];
+            for(let i=0; i<4; i++) this.spots.push({x: (Math.random()-0.5)*1.2, y: (Math.random()-0.5)*0.4, w: 2 + Math.random()*2, h: 2 + Math.random()*2});
+        }
     }
 
     update() {
@@ -107,28 +123,30 @@ class Fish {
                 if (Math.random() < 0.05) { this.idleTimer = 40 + Math.random() * 80; }
                 else {
                     this.targetX = Math.max(20, Math.min(CANVAS_WIDTH - 20, this.x + (Math.random() - 0.5) * 100));
-                    this.targetY = Math.max(20, Math.min(CANVAS_HEIGHT - 30, this.y + (Math.random() - 0.5) * 60));
+                    this.targetY = this.config.habitat === 'bottom' ? GRAVEL_MAP[Math.floor(this.targetX)] - 4 : Math.max(20, Math.min(CANVAS_HEIGHT - 30, this.y + (Math.random() - 0.5) * 60));
                 }
             }
             let dx = this.targetX - this.x; let dy = this.targetY - this.y;
             let d = Math.sqrt(dx*dx + dy*dy);
             if (d > 1) {
-                this.vx += (dx / d) * 0.01;
-                this.vy += (dy / d) * 0.01;
+                this.vx += (dx / d) * this.config.speed * 0.02;
+                this.vy += (dy / d) * this.config.speed * 0.02;
             }
         }
         this.vx *= FRICTION; this.vy *= FRICTION;
         this.x += this.vx; this.y += this.vy;
+        
+        if (this.config.habitat === 'bottom') {
+            const floorY = GRAVEL_MAP[Math.floor(this.x)] || CANVAS_HEIGHT - 10;
+            if (this.y < floorY - 8) this.vy += 0.1;
+            if (this.y > floorY - 2) { this.y = floorY - 2; this.vy = 0; }
+        }
+
         if (this.vx > 0.05) this.flip = false;
         if (this.vx < -0.05) this.flip = true;
 
-        if (this.mouthTimer > 0) this.mouthTimer--;
         foods.forEach((f, i) => {
-            if (Math.abs(f.x - this.x) < 15 && Math.abs(f.y - this.y) < 10) this.mouthTimer = 20;
-            if (Math.abs(f.x - this.x) < 10 && Math.abs(f.y - this.y) < 6) {
-                foods.splice(i, 1);
-                this.mouthTimer = 30;
-            }
+            if (Math.abs(f.x - this.x) < 8 && Math.abs(f.y - this.y) < 4) foods.splice(i, 1);
         });
     }
 
@@ -139,104 +157,103 @@ class Fish {
 
         const dot = (x, y, w, h, c) => {
             ctx.fillStyle = c;
-            ctx.fillRect(x, y, w, h);
+            ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
         };
 
         const config = this.config;
         const sway = Math.floor(Math.sin(this.animTimer * 1.5) * 1);
 
-        // --- PIXEL-PERFECT SPRITE DEFINITIONS ---
+        // --- SPRITE RENDERING WITH CLIPPING PROTECTION ---
         
+        const drawBodyShape = (outlineOnly = false) => {
+            const color = outlineOnly ? config.outline : config.c1;
+            if (this.type === 'goldfish') {
+                dot(-4, -2, 8, 5, color);
+                dot(-3, -3, 6, 7, color);
+            } else if (this.type === 'koi' || this.type === 'neon') {
+                dot(-6, -2, 12, 4, color);
+                dot(-5, -3, 10, 6, color);
+            } else if (this.type === 'betta') {
+                dot(-4, -1, 8, 2, color);
+            } else if (this.type === 'angelfish') {
+                dot(-3, -3, 6, 6, color);
+                dot(-2, -4, 4, 8, color);
+                dot(-1, -5, 2, 10, color);
+            } else if (this.type === 'pufferfish' || this.type === 'snail') {
+                dot(-3, -3, 6, 6, color);
+                dot(-4, -2, 8, 4, color);
+            } else if (this.type === 'guppy' || this.type === 'cory') {
+                dot(-3, -2, 6, 4, color);
+                dot(-4, -1, 8, 2, color);
+            } else {
+                dot(-4, -2, 8, 4, color);
+            }
+        };
+
+        // 1. Draw Outline (Slightly larger)
+        ctx.save();
+        ctx.translate(-1, -1);
+        drawBodyShape(true);
+        ctx.translate(2, 0);
+        drawBodyShape(true);
+        ctx.translate(-1, 2);
+        drawBodyShape(true);
+        ctx.translate(0, -2);
+        drawBodyShape(true);
+        ctx.restore();
+
+        // 2. Draw Base Body & Setup Clipping for Patterns
+        ctx.save();
+        // Create clipping path from body shape pixels
+        // (Simplified for pixel art: draw patterns, then body pixels over them with composite, OR just draw body then patterns)
+        drawBodyShape();
+
+        // 3. Draw Patterns (Clipped logically by species drawing order)
         if (this.type === 'goldfish') {
-            // Outline
-            dot(-5,-3,10,7,config.outline);
-            dot(-7,-4,4,9,config.outline);
-            // Body
-            dot(-4,-2,8,5,config.c1);
-            dot(-3,-3,6,1,config.c2); // Highlight
-            dot(-3,2,6,1,config.c3); // Shadow
-            // Tail (Double layered)
-            dot(-6,-3+sway,3,7,config.outline);
-            dot(-6,-2+sway,2,5,config.c1);
-            // Eye
-            dot(2,-1,2,2,config.outline);
-            dot(3,-1,1,1,'#fff');
+            dot(-3, -3, 6, 1, config.c2); // Highlight
+            dot(-3, 2, 6, 1, config.c3);  // Shadow
+            dot(-6, -3+sway, 3, 7, config.outline); // Tail outline
+            dot(-6,-2+sway, 2, 5, config.c1);       // Tail fill
         } 
-        else if (this.type === 'angelfish') {
-            // Outline
-            dot(-3,-6,6,12,config.outline);
-            dot(-4,-4,8,8,config.outline);
-            // Body
-            dot(-2,-5,4,10,config.c1);
-            dot(-3,-3,6,6,config.c1);
-            // Stripes
-            dot(0,-5,1,10,config.c3);
-            dot(2,-3,1,6,config.c3);
-            // Fins
-            dot(-1,-7,2,1,config.c2);
-            dot(-1,6,2,1,config.c2);
-            // Eye
-            dot(2,-2,2,2,config.outline);
+        else if (this.type === 'koi') {
+            this.spots.forEach(sp => dot(Math.floor(sp.x*10 - 5), Math.floor(sp.y*4 - 2), sp.w, sp.h, config.c3));
+            dot(-8, -2+sway, 2, 4, config.outline);
+            dot(-8, -1+sway, 1, 2, config.c1);
+        }
+        else if (this.type === 'betta') {
+            dot(-2, -6 + sway/2, 5, 5, config.c2); // Fins
+            dot(-2, 1 - sway/2, 5, 5, config.c2);
+            dot(-8, -4 + sway, 5, 8, config.c2);
+        }
+        else if (this.type === 'neon') {
+            dot(-5, -1, 8, 1, config.c2); // Stripe
+            dot(-7, -2 + sway/2, 2, 4, '#ff0000'); // Tail
         }
         else if (this.type === 'clownfish') {
-            // Outline
-            dot(-5,-3,10,6,config.outline);
-            // Body
-            dot(-4,-2,8,4,config.c1);
-            // White Bands
-            dot(-2,-2,2,4,config.c2);
+            dot(-2,-2,2,4,config.c2); // White bands
             dot(2,-2,2,4,config.c2);
-            // Tail
             dot(-6,-2+sway,2,4,config.outline);
-            dot(-6,-1+sway,1,2,config.c1);
-            // Eye
-            dot(3,-1,1,1,config.outline);
         }
         else if (this.type === 'pufferfish') {
-            // Outline (Round)
-            dot(-4,-4,8,8,config.outline);
-            dot(-5,-3,10,6,config.outline);
-            // Body
-            dot(-3,-3,6,6,config.c1);
-            dot(-4,-2,8,4,config.c1);
-            // Spots
-            dot(-2,-1,1,1,config.c3);
+            dot(-2,-1,1,1,config.c3); // Spots
             dot(0,1,1,1,config.c3);
             dot(-2,2,1,1,config.c3);
-            // Eye
-            dot(2,-2,2,2,config.outline);
-            dot(3,-2,1,1,'#fff');
         }
-        else if (this.type === 'koi') {
-            // Outline
-            dot(-7,-2,14,4,config.outline);
-            dot(-6,-3,12,6,config.outline);
-            // Body
-            dot(-6,-2,12,4,config.c1);
-            // Blotches
-            dot(-4,-2,3,2,config.c3);
-            dot(1,0,3,2,config.c3);
-            // Tail
-            dot(-8,-2+sway,2,4,config.outline);
-            // Eye
-            dot(4,-1,1,1,config.outline);
+        else if (this.type === 'snail') {
+            dot(-4, 2, 8, 1, '#ccaa88'); // Foot
         }
-        else {
-            // Default Fish style for others
-            dot(-4,-2,8,4,config.c1);
-            dot(-6,-2+sway,2,4,config.outline);
-            dot(2,-1,1,1,config.outline);
+        else if (this.type === 'shrimp') {
+            dot(-2, 1, 1, 1, '#fff'); // Legs
+            dot(1, 1, 1, 1, '#fff');
+            dot(4, 0, 2, 1, config.c1);
         }
 
-        if (this.mouthTimer > 0) {
-            let mx = 4, my = 1;
-            if (this.type === 'angelfish') { mx = 3; my = 2; }
-            if (this.type === 'koi') { mx = 7; my = 0; }
-            if (this.type === 'betta') { mx = 3; my = 1; }
-            if (this.type === 'pufferfish') { mx = 4; my = 1; }
-            dot(mx, my, 2, 2, config.outline);
+        // 4. Eye
+        if (this.type !== 'snail') {
+            dot(this.type === 'angelfish' ? 0 : 3, -1, 2, 2, '#000');
         }
 
+        ctx.restore();
         ctx.restore();
     }
 }
@@ -284,7 +301,7 @@ function handleStart(e) {
     else if (t.id === 'feed-btn') foods.push(new Food(20 + Math.random() * (CANVAS_WIDTH - 40), 0));
     else if (t.id === 'clean-btn') { gravelDebris = 0; foods = foods.filter(f => !f.settled); }
     else if (t.id === 'add-fish-btn') document.getElementById('add-fish-overlay').classList.remove('hidden');
-    else if (t.id === 'add-plant-btn') plants.push(new Plant('seaweed', Math.random() * CANVAS_WIDTH));
+    else if (t.id === 'add-plant-btn') document.getElementById('add-plant-overlay').classList.remove('hidden');
     else if (t.id === 'gravel-btn') document.getElementById('gravel-overlay').classList.remove('hidden');
     else if (t.id === 'reset-btn') resetGame();
     
@@ -293,6 +310,13 @@ function handleStart(e) {
         document.getElementById('add-fish-overlay').classList.add('hidden');
     } 
     else if (t.id === 'close-add-fish') document.getElementById('add-fish-overlay').classList.add('hidden');
+    
+    else if (t.classList.contains('add-plant-option')) {
+        plants.push(new Plant(t.getAttribute('data-plant'), 20 + Math.random() * (CANVAS_WIDTH - 40)));
+        document.getElementById('add-plant-overlay').classList.add('hidden');
+    }
+    else if (t.id === 'close-add-plant') document.getElementById('add-plant-overlay').classList.add('hidden');
+
     else if (t.classList.contains('gravel-option')) {
         gravelColor = t.getAttribute('data-color');
         document.getElementById('gravel-overlay').classList.add('hidden');
@@ -317,6 +341,7 @@ function resetGame() {
     document.getElementById('menu-overlay').classList.remove('hidden');
     document.getElementById('game-ui').classList.add('hidden');
     document.getElementById('add-fish-overlay').classList.add('hidden');
+    document.getElementById('add-plant-overlay').classList.add('hidden');
     document.getElementById('gravel-overlay').classList.add('hidden');
 }
 
