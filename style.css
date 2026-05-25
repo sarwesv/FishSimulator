@@ -3,10 +3,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    -webkit-touch-callout: none; /* Prevent system menu on long press */
-    -webkit-user-select: none;   /* Prevent text selection */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     user-select: none;
-    touch-action: none;          /* Prevent default touch actions like zoom/scroll */
+    touch-action: none;
 }
 
 body, html {
@@ -14,7 +14,7 @@ body, html {
     padding: 0;
     width: 100%;
     height: 100%;
-    height: 100dvh; /* Modern mobile viewport height */
+    height: 100dvh;
     overflow: hidden;
     background-color: #000;
 }
@@ -53,84 +53,82 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.85);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 200; /* Above UI */
+    pointer-events: auto;
 }
 
 h1 {
     color: #fff;
+    font-family: 'VT323', monospace;
     font-size: 2.5rem;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px #000;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 .fish-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 .menu-btn, .ui-btn {
     font-family: 'VT323', monospace;
-    background-color: #333;
+    background-color: #444;
     color: #fff;
-    border: 2px solid #fff;
-    padding: 10px 20px;
-    font-size: 1.2rem;
+    border: 3px solid #fff;
+    padding: 15px 25px;
+    font-size: 1.4rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0px #000;
+    pointer-events: auto;
 }
 
 .menu-btn:active, .ui-btn:active {
-    background-color: #666;
+    background-color: #888;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000;
 }
 
 .menu-btn.selected {
-    background-color: #00aa00;
+    background-color: #22aa22;
     border-color: #00ff00;
+}
+
+#start-btn {
+    margin-top: 20px;
 }
 
 /* Game UI Controls */
 #game-ui {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 15px;
-    z-index: 100; /* Force it above everything */
+    gap: 12px;
+    z-index: 150;
     flex-wrap: wrap;
     padding: 10px;
-    pointer-events: auto;
+    pointer-events: none; /* Let clicks through to buttons */
 }
 
-.ui-btn {
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 2px solid #fff;
-    color: #fff;
-    font-family: 'VT323', monospace;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+#game-ui .ui-btn {
+    pointer-events: auto; /* Buttons must be clickable */
 }
 
 .hidden {
     display: none !important;
 }
 
-/* Mobile Adjustments */
 @media (max-width: 600px) {
-    h1 {
-        font-size: 1.8rem;
-    }
-    .menu-btn {
-        padding: 8px 16px;
-        font-size: 1rem;
-    }
+    h1 { font-size: 1.8rem; }
+    .menu-btn, .ui-btn { padding: 10px 15px; font-size: 1.1rem; }
 }
