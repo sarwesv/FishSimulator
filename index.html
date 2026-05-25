@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
     <div id="game-container">
@@ -43,10 +43,10 @@
         <div id="add-plant-overlay" class="overlay hidden">
             <h1>ADD NEW PLANT</h1>
             <div class="fish-options">
-                <button class="add-plant-option menu-btn" data-plant="tall">TALL SEAWEED</button>
-                <button class="add-plant-option menu-btn" data-plant="short">SHORT BUSH</button>
-                <button class="add-plant-option menu-btn" data-plant="fern">WATER FERN</button>
-                <button class="add-plant-option menu-btn" data-plant="red">RED ALGAE</button>
+                <button class="add-plant-option menu-btn" data-plant="seaweed">SEAWEED</button>
+                <button class="add-plant-option menu-btn" data-plant="fern">FERN</button>
+                <button class="add-plant-option menu-btn" data-plant="grass">GRASS</button>
+                <button class="add-plant-option menu-btn" data-plant="kelp">KELP</button>
             </div>
             <button id="close-add-plant" class="menu-btn">CANCEL</button>
         </div>
@@ -57,9 +57,22 @@
             <button id="clean-btn" class="ui-btn">CLEAN</button>
             <button id="add-fish-btn" class="ui-btn">ADD FISH</button>
             <button id="add-plant-btn" class="ui-btn">ADD PLANT</button>
+            <button id="gravel-btn" class="ui-btn">GRAVEL</button>
             <button id="reset-btn" class="ui-btn">RESET</button>
         </div>
+
+        <!-- Gravel Overlay -->
+        <div id="gravel-overlay" class="overlay hidden">
+            <h1>SELECT GRAVEL</h1>
+            <div class="fish-options">
+                <button class="gravel-option menu-btn" data-color="#887766">NATURAL</button>
+                <button class="gravel-option menu-btn" data-color="#4466aa">BLUE</button>
+                <button class="gravel-option menu-btn" data-color="#aa4488">PINK</button>
+                <button class="gravel-option menu-btn" data-color="#eeeeee">WHITE</button>
+            </div>
+            <button id="close-gravel" class="menu-btn">CANCEL</button>
+        </div>
     </div>
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
