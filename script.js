@@ -177,158 +177,148 @@ foods.forEach((f, i) => {
     }
 
     draw() {
-        const s = this.config.size;
+        const s = Math.floor(this.config.size);
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-        const tw = Math.sin(this.animTimer) * (3 + speed * 4);
+        const tw = Math.floor(Math.sin(this.animTimer) * (2 + speed * 2));
         
         ctx.save();
-        ctx.translate(this.x, this.y);
+        // Snap to grid for "pixel-perfect" movement feel
+        ctx.translate(Math.floor(this.x), Math.floor(this.y));
         if (this.flip) ctx.scale(-1, 1);
 
-        // --- Anatomical Shading Setup ---
+        // --- Blocky Shading Setup ---
+        // Using fewer gradient stops for a "posterized" look
         const bodyGrad = ctx.createLinearGradient(0, -s * 0.5, 0, s * 0.5);
         bodyGrad.addColorStop(0, this.config.highlight);
-        bodyGrad.addColorStop(0.4, this.config.color);
+        bodyGrad.addColorStop(0.5, this.config.color);
         bodyGrad.addColorStop(1, this.config.shadow);
 
-        // --- Species-Specific Rendering ---
+        ctx.lineJoin = 'miter'; 
+        ctx.lineWidth = 2; // Thicker lines for blocky feel
+
+        // --- Species-Specific Blocky Rendering ---
         if (this.type === 'koi') {
-            // Realistic Cyprinid (Koi) Shape
             ctx.beginPath();
-            ctx.moveTo(s * 0.95, 0); // Nose
-            ctx.bezierCurveTo(s * 0.8, -s * 0.45, s * 0.1, -s * 0.5, -s * 0.8, -s * 0.1); // Back
-            ctx.bezierCurveTo(-s * 0.9, -s * 0.05, -s * 0.9, s * 0.05, -s * 0.8, s * 0.1); // Peduncle
-            ctx.bezierCurveTo(s * 0.1, s * 0.5, s * 0.8, s * 0.45, s * 0.95, 0); // Belly
+            ctx.moveTo(s * 0.9, 0);
+            ctx.lineTo(s * 0.6, -s * 0.4);
+            ctx.lineTo(-s * 0.2, -s * 0.5);
+            ctx.lineTo(-s * 0.8, -s * 0.2);
+            ctx.lineTo(-s * 0.8, s * 0.2);
+            ctx.lineTo(-s * 0.2, s * 0.5);
+            ctx.lineTo(s * 0.6, s * 0.4);
+            ctx.closePath();
             ctx.fillStyle = bodyGrad;
             ctx.fill();
 
-            // Koi Blotches (Patterns)
+            // Blocky Blotches
             this.blotches.forEach(b => {
-                ctx.save();
-                ctx.translate(b.x * s, b.y * s);
-                ctx.rotate(b.rot);
-                ctx.beginPath(); ctx.ellipse(0, 0, b.rx * s, b.ry * s, 0, 0, Math.PI * 2);
-                ctx.fillStyle = b.c; ctx.globalAlpha = 0.85; ctx.fill();
-                ctx.restore();
+                ctx.fillStyle = b.c;
+                ctx.fillRect(Math.floor(b.x * s) - 2, Math.floor(b.y * s) - 2, Math.floor(b.rx * s * 1.5), Math.floor(b.ry * s * 1.5));
             });
 
-            // Realistic Fins
+            // Blocky Fins
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.beginPath(); // Dorsal
-            ctx.moveTo(-s * 0.2, -s * 0.45); ctx.bezierCurveTo(-s * 0.4, -s * 0.8, -s * 0.7, -s * 0.6, -s * 0.7, -s * 0.2); ctx.fill();
-            
-            ctx.beginPath(); // Pectoral
-            ctx.ellipse(s * 0.4, s * 0.2, s * 0.4, s * 0.15, 0.4 + tw * 0.05, 0, Math.PI * 2); ctx.fill();
+            ctx.fillRect(-s * 0.4, -s * 0.7, s * 0.3, s * 0.3); // Dorsal
+            ctx.fillRect(s * 0.2, s * 0.3, s * 0.4, s * 0.2);  // Pectoral
 
-            // Heterocercal-like Tail
+            // Tail (Angular)
             ctx.beginPath();
             ctx.moveTo(-s * 0.8, 0);
-            ctx.bezierCurveTo(-s * 1.4, -s * 1.1 + tw, -s * 1.8, -s * 0.6, -s * 1.5, 0);
-            ctx.bezierCurveTo(-s * 1.8, s * 0.6, -s * 1.4, s * 1.1 - tw, -s * 0.8, 0);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; ctx.fill();
+            ctx.lineTo(-s * 1.4, -s * 0.8 + tw);
+            ctx.lineTo(-s * 1.2, 0);
+            ctx.lineTo(-s * 1.4, s * 0.8 - tw);
+            ctx.closePath();
+            ctx.fill();
 
         } else if (this.type === 'goldfish') {
-            // Fancy Goldfish Anatomical Shape (Double Tail / Fantail)
-            ctx.beginPath();
-            ctx.moveTo(s * 0.8, 0); // Snout
-            ctx.bezierCurveTo(s * 0.6, -s * 0.9, -s * 0.4, -s * 0.8, -s * 0.8, -s * 0.1); // High Arching Back
-            ctx.bezierCurveTo(-s * 0.9, -s * 0.05, -s * 0.9, s * 0.05, -s * 0.8, s * 0.1); 
-            ctx.bezierCurveTo(-s * 0.4, s * 0.9, s * 0.6, s * 0.8, s * 0.8, 0); // Deep Belly
-            ctx.fillStyle = bodyGrad;
-            ctx.fill();
-
-            // Flowing Fantail
-            const drawFantail = (offsetY) => {
-                ctx.fillStyle = 'rgba(255, 120, 0, 0.35)';
-                ctx.beginPath();
-                ctx.moveTo(-s * 0.75, offsetY);
-                ctx.bezierCurveTo(-s * 1.8, -s * 1.5 + tw + offsetY, -s * 2.8, -s * 1.2, -s * 2.5, offsetY);
-                ctx.bezierCurveTo(-s * 2.8, s * 1.2, -s * 1.8, s * 1.5 - tw + offsetY, -s * 0.75, offsetY);
-                ctx.fill();
-            };
-            drawFantail(-s * 0.1); drawFantail(s * 0.1);
-
-            // Dorsal Fin
-            ctx.beginPath();
-            ctx.moveTo(-s * 0.1, -s * 0.75);
-            ctx.bezierCurveTo(-s * 0.4, -s * 1.4 + tw * 0.2, -s * 0.9, -s * 1.2, -s * 0.8, -s * 0.4);
-            ctx.fill();
-
-        } else if (this.type === 'betta') {
-            // Betta Splendens Slender Body
             ctx.beginPath();
             ctx.moveTo(s * 0.8, 0);
-            ctx.bezierCurveTo(s * 0.5, -s * 0.25, -s * 0.3, -s * 0.2, -s * 0.9, 0);
-            ctx.bezierCurveTo(-s * 0.3, s * 0.2, s * 0.5, s * 0.25, s * 0.8, 0);
+            ctx.lineTo(s * 0.4, -s * 0.8);
+            ctx.lineTo(-s * 0.4, -s * 0.8);
+            ctx.lineTo(-s * 0.8, 0);
+            ctx.lineTo(-s * 0.4, s * 0.8);
+            ctx.lineTo(s * 0.4, s * 0.8);
+            ctx.closePath();
             ctx.fillStyle = bodyGrad;
             ctx.fill();
 
-            // Hyper-Realistic Flowing Fins (Drapery Physics)
-            const drawFlowingFin = (x, y, w, h, angle, wave) => {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(angle);
-                ctx.fillStyle = 'rgba(200, 20, 50, 0.4)';
+            // Blocky Fantail
+            ctx.fillStyle = 'rgba(255, 120, 0, 0.5)';
+            const drawTailPart = (oy) => {
                 ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.bezierCurveTo(w * 0.6, -h * 0.5 + wave, w * 1.4, -h * 0.2, w, 0);
-                ctx.bezierCurveTo(w * 1.4, h * 0.2, w * 0.6, h * 0.5 - wave, 0, 0);
+                ctx.moveTo(-s * 0.7, oy);
+                ctx.lineTo(-s * 1.8, -s * 1.2 + tw + oy);
+                ctx.lineTo(-s * 1.4, oy);
+                ctx.lineTo(-s * 1.8, s * 1.2 - tw + oy);
+                ctx.closePath();
                 ctx.fill();
-                // Add fin rays
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; ctx.lineWidth = 0.5;
-                for(let i=1; i<5; i++) {
-                    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w*0.8, (i-2.5)*h*0.2); ctx.stroke();
-                }
-                ctx.restore();
             };
-            drawFlowingFin(-s * 0.2, -s * 0.2, s * 2.8, s * 2.2, -0.7, tw * 4); // Dorsal
-            drawFlowingFin(-s * 0.2, s * 0.2, s * 2.4, s * 2.0, 0.7, -tw * 3); // Anal
-            drawFlowingFin(-s * 0.9, 0, s * 3.8, s * 2.5, 0, tw * 5); // Caudal
+            drawTailPart(-4); drawTailPart(4);
+
+        } else if (this.type === 'betta') {
+            ctx.beginPath();
+            ctx.moveTo(s * 0.8, 0);
+            ctx.lineTo(0, -s * 0.3);
+            ctx.lineTo(-s * 0.9, 0);
+            ctx.lineTo(0, s * 0.3);
+            ctx.closePath();
+            ctx.fillStyle = bodyGrad;
+            ctx.fill();
+
+            // Angular Flowing Fins
+            const drawBlockyFin = (x, y, w, h, twMod) => {
+                ctx.fillStyle = 'rgba(200, 20, 50, 0.5)';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - w * 0.5, y - h + twMod);
+                ctx.lineTo(x - w, y);
+                ctx.lineTo(x - w * 0.5, y + h - twMod);
+                ctx.closePath();
+                ctx.fill();
+            };
+            drawBlockyFin(-s * 0.2, -s * 0.2, s * 2, s * 1.5, tw * 2);
+            drawBlockyFin(-s * 0.2, s * 0.2, s * 1.8, s * 1.2, -tw * 2);
+            drawBlockyFin(-s * 0.8, 0, s * 2.5, s * 2, tw * 3);
 
         } else if (this.type === 'neon') {
-            // Neon Tetra Fusiform Shape
             ctx.beginPath();
             ctx.moveTo(s * 1.0, 0);
-            ctx.bezierCurveTo(s * 0.7, -s * 0.35, -s * 0.5, -s * 0.3, -s * 1.0, 0);
-            ctx.bezierCurveTo(-s * 0.5, s * 0.3, s * 0.7, s * 0.35, s * 1.0, 0);
+            ctx.lineTo(0, -s * 0.35);
+            ctx.lineTo(-s * 1.0, 0);
+            ctx.lineTo(0, s * 0.35);
+            ctx.closePath();
             ctx.fillStyle = bodyGrad;
             ctx.fill();
 
-            // Iridescent Lateral Line
-            const lateralGrad = ctx.createLinearGradient(-s, 0, s, 0);
-            lateralGrad.addColorStop(0, 'rgba(0, 255, 255, 0)');
-            lateralGrad.addColorStop(0.5, 'rgba(0, 255, 255, 0.9)');
-            lateralGrad.addColorStop(1, 'rgba(0, 255, 255, 0)');
-            ctx.fillStyle = lateralGrad;
-            ctx.shadowBlur = 8; ctx.shadowColor = '#00ffff';
-            ctx.fillRect(-s * 0.8, -s * 0.08, s * 1.6, s * 0.12);
-            ctx.shadowBlur = 0;
-
-            // Red Ventral Patch
-            ctx.fillStyle = 'rgba(255, 40, 40, 0.7)';
-            ctx.beginPath(); ctx.ellipse(-s * 0.1, s * 0.15, s * 0.7, s * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+            // Blocky Iridescent Line
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(-s * 0.8, -s * 0.05, s * 1.5, s * 0.1);
 
             // Tail
-            ctx.fillStyle = 'rgba(255, 40, 40, 0.5)';
+            ctx.fillStyle = 'rgba(255, 40, 40, 0.6)';
             ctx.beginPath();
-            ctx.moveTo(-s, 0); ctx.lineTo(-s * 1.8, -s * 0.7 + tw * 0.5); ctx.lineTo(-s * 1.8, s * 0.7 - tw * 0.5); ctx.fill();
+            ctx.moveTo(-s, 0);
+            ctx.lineTo(-s * 1.6, -s * 0.6 + tw);
+            ctx.lineTo(-s * 1.6, s * 0.6 - tw);
+            ctx.closePath();
+            ctx.fill();
         }
 
-        // --- Shared Realistic Details ---
+        // --- Pixel Details ---
         
-        // Operculum (Gill Cover)
-        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(s * 0.45, 0, s * 0.35, -Math.PI / 2.5, Math.PI / 2.5); ctx.stroke();
+        // Blocky Eye
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(Math.floor(s * 0.65), Math.floor(-s * 0.2), 4, 4);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(Math.floor(s * 0.75), Math.floor(-s * 0.15), 2, 2);
 
-        // Eye with Depth
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s * 0.75, -s * 0.12, s * 0.18, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(s * 0.82, -s * 0.12, s * 0.1, 0, Math.PI * 2); ctx.fill();
-        // Eye Highlight
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s * 0.85, -s * 0.15, s * 0.04, 0, Math.PI * 2); ctx.fill();
-
-        // Mouth Detail
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); 
-        ctx.moveTo(s * 0.9, s * 0.1); ctx.lineTo(s * 1.0, s * 0.05); ctx.stroke();
+        // Simple Gill Line
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath();
+        ctx.moveTo(s * 0.4, -s * 0.2);
+        ctx.lineTo(s * 0.5, 0);
+        ctx.lineTo(s * 0.4, s * 0.2);
+        ctx.stroke();
 
         ctx.restore();
     }
