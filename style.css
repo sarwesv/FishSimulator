@@ -21,10 +21,8 @@ body {
 
 #game-container {
     position: relative;
-    width: 90vw;
-    max-width: 500px;
-    aspect-ratio: 200 / 125;
-    border: 4px solid #444;
+    width: 100vw;
+    height: 100vh;
     background-color: #000;
 }
 
