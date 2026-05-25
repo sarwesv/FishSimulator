@@ -173,8 +173,18 @@ class Fish {
 
         this.bubbleTimer--;
         if (this.bubbleTimer <= 0) {
-            bubbles.push(new Bubble(this.x + (this.flip ? -this.config.size*0.7 : this.config.size*0.7), this.y, Math.random() > 0.8));
-            this.bubbleTimer = 200 + Math.random() * 800;
+            // Blow a burst of 2-4 bubbles
+            const count = 2 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    bubbles.push(new Bubble(
+                        this.x + (this.flip ? -this.config.size * 0.7 : this.config.size * 0.7),
+                        this.y - (this.config.size * 0.1), 
+                        Math.random() > 0.9
+                    ));
+                }, i * 150); // Stagger the bubbles
+            }
+            this.bubbleTimer = 150 + Math.random() * 500;
         }
     }
 
