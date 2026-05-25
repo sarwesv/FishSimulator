@@ -9,31 +9,37 @@
     touch-action: none;          /* Prevent default touch actions like zoom/scroll */
 }
 
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
+
 body {
-    background-color: #1a1a1a;
     font-family: 'VT323', monospace;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
 }
 
 #game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-color: #000;
 }
 
 canvas {
-    width: 100vw;
-    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
@@ -86,6 +92,11 @@ h1 {
     background-color: #666;
 }
 
+.menu-btn.selected {
+    background-color: #00aa00;
+    border-color: #00ff00;
+}
+
 /* Game UI Controls */
 #game-ui {
     position: absolute;
@@ -94,12 +105,14 @@ h1 {
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     z-index: 5;
+    flex-wrap: wrap;
+    padding: 0 10px;
 }
 
 .ui-btn {
-    padding: 5px 15px;
+    padding: 5px 12px;
     font-size: 1rem;
     background-color: rgba(0, 0, 0, 0.5);
 }
