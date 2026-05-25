@@ -241,56 +241,89 @@ class Fish {
 
         // 2. Draw Base Body & Setup Clipping for Patterns
         ctx.save();
-        // Create clipping path from body shape pixels
-        // (Simplified for pixel art: draw patterns, then body pixels over them with composite, OR just draw body then patterns)
+        
+        // Define clipping path based on body shape
+        ctx.beginPath();
+        const clipBody = () => {
+            if (this.type === 'goldfish') {
+                ctx.rect(Math.floor(-4 * p), Math.floor(-2 * p), Math.floor(8 * p), Math.floor(5 * p));
+                ctx.rect(Math.floor(-3 * p), Math.floor(-3 * p), Math.floor(6 * p), Math.floor(7 * p));
+            } else if (this.type === 'koi' || this.type === 'neon') {
+                ctx.rect(Math.floor(-6 * p), Math.floor(-2 * p), Math.floor(12 * p), Math.floor(4 * p));
+                ctx.rect(Math.floor(-5 * p), Math.floor(-3 * p), Math.floor(10 * p), Math.floor(6 * p));
+            } else if (this.type === 'betta') {
+                ctx.rect(Math.floor(-4 * p), Math.floor(-1 * p), Math.floor(8 * p), Math.floor(2 * p));
+            } else if (this.type === 'angelfish') {
+                ctx.rect(Math.floor(-3 * p), Math.floor(-3 * p), Math.floor(6 * p), Math.floor(6 * p));
+                ctx.rect(Math.floor(-2 * p), Math.floor(-4 * p), Math.floor(4 * p), Math.floor(8 * p));
+                ctx.rect(Math.floor(-1 * p), Math.floor(-5 * p), Math.floor(2 * p), Math.floor(10 * p));
+            } else if (this.type === 'pufferfish' || this.type === 'snail' || this.type === 'clownfish') {
+                ctx.rect(Math.floor(-3 * p), Math.floor(-3 * p), Math.floor(6 * p), Math.floor(6 * p));
+                ctx.rect(Math.floor(-4 * p), Math.floor(-2 * p), Math.floor(8 * p), Math.floor(4 * p));
+            } else if (this.type === 'guppy' || this.type === 'cory') {
+                ctx.rect(Math.floor(-3 * p), Math.floor(-2 * p), Math.floor(6 * p), Math.floor(4 * p));
+                ctx.rect(Math.floor(-4 * p), Math.floor(-1 * p), Math.floor(8 * p), Math.floor(2 * p));
+            } else {
+                ctx.rect(Math.floor(-4 * p), Math.floor(-2 * p), Math.floor(8 * p), Math.floor(4 * p));
+            }
+        };
+        clipBody();
+        ctx.clip();
+
+        // Draw the solid body color first
         drawBodyShape();
 
-        // 3. Draw Patterns (Clipped logically by species drawing order)
+        // 3. Draw Patterns (Now truly clipped to the body shape)
         if (this.type === 'goldfish') {
             dot(-3, -3, 6, 1, config.c2); // Highlight
             dot(-3, 2, 6, 1, config.c3);  // Shadow
-            dot(-6, -3+sway, 3, 7, config.outline); // Tail outline
-            dot(-6,-2+sway, 2, 5, config.c1);       // Tail fill
         } 
         else if (this.type === 'koi') {
-            this.spots.forEach(sp => dot(Math.floor(sp.x*10 - 5), Math.floor(sp.y*4 - 2), sp.w, sp.h, config.c3));
-            dot(-8, -2+sway, 2, 4, config.outline);
-            dot(-8, -1+sway, 1, 2, config.c1);
+            this.spots.forEach(sp => dot(sp.x*10, sp.y*4, sp.w, sp.h, config.c3));
         }
         else if (this.type === 'betta') {
-            dot(-2, -6 + sway/2, 5, 5, config.c2); // Fins
-            dot(-2, 1 - sway/2, 5, 5, config.c2);
-            dot(-8, -4 + sway, 5, 8, config.c2);
+            dot(-2, -6 + sway/2/p, 5, 5, config.c2); // Fins
+            dot(-2, 1 - sway/2/p, 5, 5, config.c2);
+            dot(-8, -4 + sway/p, 5, 8, config.c2);
         }
         else if (this.type === 'neon') {
             dot(-5, -1, 8, 1, config.c2); // Stripe
-            dot(-7, -2 + sway/2, 2, 4, '#ff0000'); // Tail
         }
         else if (this.type === 'clownfish') {
-            dot(-2,-2,2,4,config.c2); // White bands
-            dot(2,-2,2,4,config.c2);
-            dot(-6,-2+sway,2,4,config.outline);
+            dot(-2,-3,2,6,config.c2); // White bands
+            dot(2,-3,2,6,config.c2);
         }
         else if (this.type === 'pufferfish') {
             dot(-2,-1,1,1,config.c3); // Spots
             dot(0,1,1,1,config.c3);
             dot(-2,2,1,1,config.c3);
         }
-        else if (this.type === 'snail') {
-            dot(-4, 2, 8, 1, '#ccaa88'); // Foot
-        }
-        else if (this.type === 'shrimp') {
+        ctx.restore(); // End clipping
+
+        // 4. Draw Fins and Tails (Drawn outside clipping so they can move)
+        if (this.type === 'goldfish') {
+            dot(-6, -3+sway/p, 3, 7, config.outline);
+            dot(-6,-2+sway/p, 2, 5, config.c1);
+        } else if (this.type === 'koi') {
+            dot(-8, -2+sway/p, 2, 4, config.outline);
+            dot(-8, -1+sway/p, 1, 2, config.c1);
+        } else if (this.type === 'neon') {
+            dot(-7, -2 + sway/2/p, 2, 4, '#ff0000'); // Tail
+        } else if (this.type === 'clownfish') {
+            dot(-6,-2+sway/p,2,4,config.outline);
+        } else if (this.type === 'shrimp') {
             dot(-2, 1, 1, 1, '#fff'); // Legs
             dot(1, 1, 1, 1, '#fff');
             dot(4, 0, 2, 1, config.c1);
+        } else if (this.type === 'snail') {
+            dot(-4, 2, 8, 1, '#ccaa88'); // Foot
         }
 
-        // 4. Eye
+        // 5. Eye
         if (this.type !== 'snail') {
             dot(this.type === 'angelfish' ? 0 : 3, -1, 2, 2, '#000');
         }
 
-        ctx.restore();
         ctx.restore();
     }
 }
