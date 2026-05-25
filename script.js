@@ -5,16 +5,16 @@
 
 // --- Dynamic Resolution ---
 const PIXEL_SCALE = 4; 
-let CANVAS_WIDTH = Math.floor(window.innerWidth / PIXEL_SCALE);
-let CANVAS_HEIGHT = Math.floor(window.innerHeight / PIXEL_SCALE);
+let CANVAS_WIDTH = 480 / PIXEL_SCALE;
+let CANVAS_HEIGHT = 300 / PIXEL_SCALE;
 const FRICTION = 0.98;
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 function resize() {
-    CANVAS_WIDTH = Math.floor(window.innerWidth / PIXEL_SCALE);
-    CANVAS_HEIGHT = Math.floor(window.innerHeight / PIXEL_SCALE);
+    CANVAS_WIDTH = Math.max(100, Math.floor(window.innerWidth / PIXEL_SCALE));
+    CANVAS_HEIGHT = Math.max(100, Math.floor(window.innerHeight / PIXEL_SCALE));
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
     ctx.imageSmoothingEnabled = false;
@@ -24,6 +24,8 @@ function resize() {
         GRAVEL_MAP[i] = CANVAS_HEIGHT - 15 + Math.sin(i * 0.05) * 4;
     }
 }
+// Call resize immediately
+resize();
 
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
@@ -98,10 +100,10 @@ class Fish {
     constructor(type) {
         this.type = type;
         this.config = FISH_TYPES[type] || FISH_TYPES.goldfish;
-        // Spawn centered in the tank
-        this.x = canvas.width / 2 + (Math.random() - 0.5) * 40;
-        this.y = canvas.height / 2 + (Math.random() - 0.5) * 40;
-        if (this.config.habitat === 'bottom') this.y = canvas.height - 15;
+        // Spawn centered in the tank using latest dimensions
+        this.x = CANVAS_WIDTH / 2 + (Math.random() - 0.5) * 40;
+        this.y = CANVAS_HEIGHT / 2 + (Math.random() - 0.5) * 40;
+        if (this.config.habitat === 'bottom') this.y = CANVAS_HEIGHT - 15;
         this.vx = 0; this.vy = 0;
         this.targetX = this.x; this.targetY = this.y;
         this.flip = false;
@@ -117,10 +119,10 @@ class Fish {
     update() {
         this.animTimer += 0.15;
 
-        // Boundary Safety Check
-        if (this.x < -20 || this.x > canvas.width + 20 || this.y < -20 || this.y > canvas.height + 20) {
-            this.x = canvas.width / 2;
-            this.y = canvas.height / 2;
+        // Boundary Safety Check (use latest dimensions)
+        if (this.x < -20 || this.x > CANVAS_WIDTH + 20 || this.y < -20 || this.y > CANVAS_HEIGHT + 20) {
+            this.x = CANVAS_WIDTH / 2;
+            this.y = CANVAS_HEIGHT / 2;
             this.targetX = this.x;
             this.targetY = this.y;
         }
