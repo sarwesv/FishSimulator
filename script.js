@@ -1,10 +1,10 @@
 /**
  * Fish Simulator
- * Dynamic 8-Bit Retro Simulation
+ * Rounded 8-Bit Retro Sprite Simulation
  */
 
 // --- Dynamic Resolution ---
-const PIXEL_SCALE = 4; // Higher = bigger pixels
+const PIXEL_SCALE = 4; 
 let CANVAS_WIDTH = Math.floor(window.innerWidth / PIXEL_SCALE);
 let CANVAS_HEIGHT = Math.floor(window.innerHeight / PIXEL_SCALE);
 const FRICTION = 0.98;
@@ -19,7 +19,6 @@ function resize() {
     canvas.height = CANVAS_HEIGHT;
     ctx.imageSmoothingEnabled = false;
     
-    // Re-generate gravel map for new width
     GRAVEL_MAP.length = 0;
     for (let i = 0; i <= CANVAS_WIDTH; i++) {
         GRAVEL_MAP[i] = CANVAS_HEIGHT - 15 + Math.sin(i * 0.05) * 4;
@@ -29,7 +28,7 @@ function resize() {
 const GRAVEL_MAP = [];
 const FISH_TYPES = {
     goldfish: { color: '#ff9900', pattern: '#ffffff', size: 16, speed: 0.4 },
-    neon: { color: '#0000ff', pattern: '#00ffff', size: 12, speed: 0.8 },
+    neon: { color: '#0000ff', pattern: '#00ffff', size: 14, speed: 0.8 },
     betta: { color: '#ff0044', pattern: '#aa0022', size: 18, speed: 0.2 },
     koi: { color: '#eeeeee', pattern: '#ff4400', size: 24, speed: 0.35 },
     angelfish: { color: '#dddddd', pattern: '#444444', size: 20, speed: 0.3 },
@@ -155,54 +154,78 @@ class Fish {
         const c = this.config.color;
         const pt = this.config.pattern;
 
+        // --- ROUNDED 8-BIT FISH ---
         if (this.type === 'goldfish') {
-            dot(-4, -3, 8, 6, c);
+            // Rounded Body
+            dot(-3, -3, 6, 6, c);
+            dot(-4, -2, 8, 4, c);
+            dot(-2, -4, 4, 8, c);
+            // Tail
             dot(-6, -4 + sway/p, 3, 8, pt);
-            dot(4, -1, 2, 3, c);
         } 
         else if (this.type === 'koi') {
-            dot(-8, -2, 16, 4, c);
-            this.spots.forEach(sp => dot(sp.x*8, sp.y*8, 3, 2, pt));
+            // Rounded Torpedo
+            dot(-7, -2, 14, 4, c);
+            dot(-8, -1, 16, 2, c);
+            dot(-6, -3, 12, 6, c);
+            this.spots.forEach(sp => dot(sp.x*8, sp.y*8, 3, 3, pt));
+            // Tail
             dot(-11, -3 + sway/p, 3, 6, c);
         }
         else if (this.type === 'betta') {
-            dot(-3, -1, 6, 2, c);
-            dot(-2, -6 + sway/p*0.5, 4, 5, pt);
-            dot(-2, 1 - sway/p*0.5, 4, 5, pt);
-            dot(-9, -4 + sway/p, 6, 8, pt);
+            // Slender Round Body
+            dot(-3, -2, 6, 4, c);
+            dot(-4, -1, 8, 2, c);
+            // Round Fins
+            dot(-1, -6 + sway/p*0.5, 3, 5, pt);
+            dot(-1, 1 - sway/p*0.5, 3, 5, pt);
+            // Round Tail
+            dot(-8, -4 + sway/p, 5, 8, pt);
+            dot(-9, -2 + sway/p, 7, 4, pt);
         }
         else if (this.type === 'neon') {
+            // Small Sleek Round
+            dot(-5, -2, 10, 4, c);
             dot(-6, -1, 12, 2, c);
-            dot(-6, 0, 10, 1, pt);
+            dot(-5, 0, 9, 1, pt); // Stripe
+            // Tail
             dot(-8, -2 + sway/p*0.5, 2, 4, '#ff0000');
         }
         else if (this.type === 'angelfish') {
+            // Tall Round Diamond
             dot(-1, -6, 2, 12, c);
             dot(-3, -3, 6, 6, c);
+            dot(-4, -1, 8, 2, c);
             dot(0, -4, 1, 8, pt);
+            // Tail
             dot(-6, -1, 4, 2, c);
         }
         else if (this.type === 'guppy') {
-            dot(-2, -1, 5, 2, c);
+            dot(-2, -2, 4, 4, c);
+            dot(-3, -1, 6, 2, c);
             dot(-7, -4 + sway/p, 5, 8, pt);
         }
         else if (this.type === 'cory') {
             dot(-4, -2, 8, 4, c);
+            dot(-3, -3, 6, 6, c);
             dot(-7, -1 + sway/p*0.5, 3, 2, pt);
         }
         else if (this.type === 'shrimp') {
-            dot(-4, 0, 8, 2, c);
-            dot(4, 0, 2, 1, c);
+            dot(-4, -1, 8, 3, c);
+            dot(-5, 0, 10, 1, c);
             dot(-2, 2, 1, 2, '#fff');
             dot(2, 2, 1, 2, '#fff');
         }
         else if (this.type === 'snail') {
-            dot(-5, 1, 10, 2, '#ccaa88');
-            dot(-4, -3, 8, 4, c);
+            // Round Shell
+            dot(-3, -3, 6, 6, c);
+            dot(-4, -2, 8, 4, c);
+            dot(-5, 1, 10, 2, '#ccaa88'); // Foot
         }
 
+        // 8-bit Eye
         if (this.type !== 'snail') {
-            dot(this.type === 'angelfish' ? 0 : 4, -2, 2, 2, '#000');
+            dot(this.type === 'angelfish' ? 0 : 3, -2, 2, 2, '#000');
         }
 
         ctx.restore();
@@ -222,7 +245,7 @@ function update() {
 
 function draw() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    let b = 255 - (gravelDebris * 1.5); let g = 180 - (gravelDebris * 0.5);
+    let b = 255 - (gravelDebris * 1.2); let g = 180 - (gravelDebris * 0.5);
     ctx.fillStyle = `rgb(0, ${g}, ${b})`;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
@@ -238,7 +261,7 @@ function draw() {
     }
 }
 
-// --- Input ---
+// --- Input Handling ---
 
 function handleStart(e) {
     const t = e.target;
@@ -255,6 +278,7 @@ function handleStart(e) {
     else if (t.id === 'add-plant-btn') plants.push(new Plant('seaweed', Math.random() * CANVAS_WIDTH));
     else if (t.id === 'gravel-btn') document.getElementById('gravel-overlay').classList.remove('hidden');
     else if (t.id === 'reset-btn') resetGame();
+    
     else if (t.classList.contains('add-fish-option')) {
         fishes.push(new Fish(t.getAttribute('data-fish')));
         document.getElementById('add-fish-overlay').classList.add('hidden');
@@ -291,5 +315,5 @@ window.addEventListener('resize', resize);
 window.addEventListener('touchstart', handleStart, { passive: false });
 window.addEventListener('click', handleStart);
 
-resize(); // Initial setup
+resize(); 
 requestAnimationFrame(update);
