@@ -106,8 +106,22 @@ class Fish {
                 if (Math.random() < 0.02) { // Chance to idle
                     this.idleTimer = 60 + Math.random() * 120;
                 } else {
-                    this.targetX = 20 + Math.random() * (CANVAS_WIDTH - 40);
-                    this.targetY = 20 + Math.random() * (CANVAS_HEIGHT - 40);
+                    // Variable distance logic
+                    const isLongDistance = Math.random() < 0.3; // 30% chance for a long swim
+                    
+                    if (isLongDistance) {
+                        // Target far away (across the tank)
+                        this.targetX = this.x < CANVAS_WIDTH / 2 ? 
+                            (CANVAS_WIDTH - 30) - Math.random() * 20 : 
+                            20 + Math.random() * 20;
+                        this.targetY = 20 + Math.random() * (CANVAS_HEIGHT - 40);
+                        this.currentSpeedBoost = 1.5; // Sprint during long distances
+                    } else {
+                        // Local exploration (short distance)
+                        this.targetX = Math.max(15, Math.min(CANVAS_WIDTH - 15, this.x + (Math.random() - 0.5) * 40));
+                        this.targetY = Math.max(15, Math.min(CANVAS_HEIGHT - 15, this.y + (Math.random() - 0.5) * 30));
+                        this.currentSpeedBoost = 1.0;
+                    }
                 }
             }
 
@@ -116,9 +130,9 @@ class Fish {
             let dist = Math.sqrt(dx * dx + dy * dy);
             
             if (dist > 1) {
-                // Gentle acceleration
-                this.vx += (dx / dist) * this.config.speed * this.config.turnRate;
-                this.vy += (dy / dist) * this.config.speed * this.config.turnRate;
+                // Gentle acceleration with variable speed boost
+                this.vx += (dx / dist) * this.config.speed * this.config.turnRate * (this.currentSpeedBoost || 1.0);
+                this.vy += (dy / dist) * this.config.speed * this.config.turnRate * (this.currentSpeedBoost || 1.0);
             }
         }
 
