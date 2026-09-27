@@ -1,0 +1,143 @@
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background-color: #000;
+}
+
+body {
+    font-family: 'VT323', monospace;
+    position: relative;
+}
+
+#game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background-color: #000;
+    overflow: hidden;
+    z-index: 1;
+}
+
+canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    outline: none;
+    background-color: #000;
+}
+
+/* Overlays */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 200; 
+    pointer-events: auto;
+    overflow-y: auto; /* Enable scrolling for many fish options */
+    padding: 20px 10px;
+}
+
+h1 {
+    color: #fff;
+    font-family: 'VT323', monospace;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.fish-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.menu-btn, .ui-btn {
+    font-family: 'VT323', monospace;
+    background-color: #333;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 6px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 2px 2px 0px #000;
+    pointer-events: auto;
+}
+
+.menu-btn:active, .ui-btn:active {
+    background-color: #888;
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px #000;
+}
+
+.menu-btn.selected {
+    background-color: #22aa22;
+    border-color: #00ff00;
+}
+
+#start-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+}
+
+/* Game UI Controls */
+#game-ui {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    z-index: 150;
+    flex-wrap: wrap;
+    padding: 5px;
+    background-color: rgba(0,0,0,0.3);
+    pointer-events: none; 
+}
+
+#game-ui .ui-btn {
+    pointer-events: auto; /* Buttons must be clickable */
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 1.8rem; }
+    .menu-btn, .ui-btn { padding: 4px 10px; font-size: 0.9rem; }
+    .fish-options { grid-template-columns: 1fr 1fr; }
+}
